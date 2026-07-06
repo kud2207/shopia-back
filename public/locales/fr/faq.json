@@ -1,0 +1,26 @@
+{
+    "faq_title": "Gestion des foire aux questions",
+    "edit_faq": "Modifier la foire aux questions",
+    "add_faq": "Ajouter une question",
+    "save": "Enregistrer",
+    "delete_text": "Attention : Cette action est irréversible. La suppression de cette question entraînera la perte de toutes les données associées.",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "delete_success": "Question supprimée avec succès !",
+    "delete_error": "Une erreur est survenue lors de la suppression de la question",
+    "create_success": "Question créée avec succès !",
+    "create_error": "Une erreur est survenue lors de la création de la question",
+    "update_error": "Une erreur est survenue lors de la modification de la question",
+    "update_success": "Question modifiée avec succès !",
+    "title_french": "Titre en français",
+    "title_english": "Titre en anglais",
+    "content_french": "Contenu en français",
+    "content_english": "Contenu en anglais",
+    "no_element": "Aucun élément trouvé",
+    "title_fr_placeholder": "",
+    "title_en_placeholder": "",
+    "content_fr_placeholder": "",
+    "content_en_placeholder": "",
+    "type_placeholder": "marchand"
+
+}

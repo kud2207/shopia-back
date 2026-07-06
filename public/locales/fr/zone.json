@@ -1,0 +1,23 @@
+{
+  "add_title": "Ajouter une zone",
+  "manage_zone": "Gestion des zones de livraison",
+  "add_title_text": "Remplicez les champs ci-dessous",
+  "section1_title": "Informations du produit",
+  "zone": "Zone",
+  "description": "Description",
+  "description_placeholder": "Entrez les zones séparé par les virgules",
+  "country": "Pays",
+  "city": "Ville",
+  "quarter": "Quartiers",
+  "add": "Ajouter la zone",
+  "success": "Zone enregistré avec succès",
+  "error": "Erreur survenue lors de la création de la zone",
+  "update": "Modifier la zone",
+  "updated": "Zone modifié avec succès",
+  "error_update": "Erreur survenue lors de la modification de la zone",
+  "delete_text": "Attention cette action est irreversible en supprimant cette zones vous perdriez tous les données liées.",
+  "delete_success": "Zone supprimé avec succès !",
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "zone_title": "Libellé de la zone / Commune"
+}

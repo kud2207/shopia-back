@@ -1,0 +1,17 @@
+{
+    "reason_title": "Management of cancelation reason",
+    "edit_reason": "Edit the rejection reason",
+    "add_reason": "Add a rejection reason",
+    "reason_placeholder": "Title: Rejection Reason A, Rejection Reason B",
+    "save": "Save",
+    "delete_text": "Warning: This action is irreversible. Deleting this rejection reason will result in the loss of all related data.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "reason": "Rejection Reason",
+    "delete_success": "Rejection reason successfully deleted!",
+    "delete_error": "Error occurred during reason deletion",
+    "create_success": "Rejection reason successfully created!",
+    "create_error": "Error occurred during reason creation",
+    "update_error": "Error occurred during reason modification",
+    "update_success": "Rejection reason successfully modified!"
+}

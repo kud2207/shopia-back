@@ -1,0 +1,20 @@
+{
+    "city_title": "Gestion des Ville",
+    "edit_city": "Modifier la ville",
+    "add_city": " Ajouter une ville",
+    "country_placeholder": "Selection un pay",
+    "city_placeholder": "Name of the city",
+    "save": "Enregistrer",
+    "delete_text": "Attention cette action est irreversible en supprimant cette ville vous perdriez tous les données liées.",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "city": "Ville",
+    "delete_success": "Ville supprimé avec succès !",
+    "delete_error": "Erreur survenue lors de la suppression de la ville",
+    "create_success": "Ville creer avec succès",
+    "create_error": "Erreur survenue lors de la creation de la ville",
+    "update_error": "Erreur survenue lors de la modification de la ville",
+    "update_success": "Ville modifier avec succès",
+    "country":"Pay",
+    "no_element_found":"Aucune element a étè trouver"
+}

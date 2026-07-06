@@ -1,0 +1,20 @@
+{
+    "city_title": "City Management",
+    "edit_city": "Edit City",
+    "add_city": "Add a City",
+    "country_placeholder": "Select a Country",
+    "city_placeholder": "Name of city",
+    "save": "Save",
+    "delete_text": "Warning: This action is irreversible. Deleting this city will result in the loss of all related data.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "city": "City",
+    "delete_success": "City successfully deleted!",
+    "delete_error": "An error occurred while deleting the city.",
+    "create_success": "City successfully created!",
+    "create_error": "An error occurred while creating the city.",
+    "update_error": "An error occurred while updating the city.",
+    "update_success": "City successfully updated!",
+    "country": "Country",
+    "no_element_found": "No elements found."
+}

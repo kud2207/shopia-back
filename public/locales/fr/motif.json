@@ -1,0 +1,17 @@
+{
+    "reason_title": "Gestion des motifs d'annulation",
+    "edit_reason": "Modifier le motif",
+    "add_reason": " Ajouter un motif",
+    "reason_placeholder": "Titre: Motif A, Motif B, Enregistrer",
+    "save": "Enregistrer",
+    "delete_text": "Attention cette action est irreversible en supprimant ce motif vous perdriez tous les données liées.",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "reason": "Motif",
+    "delete_success": "Motif supprimé avec succès !",
+    "delete_error": "Erreur survenue lors de la suppression du motif",
+    "create_success": "Motif creer avec succès",
+    "create_error": "Erreur survenue lors de la creation du motif",
+    "update_error": "Erreur survenue lors de la modification du motif",
+    "update_success": "Motif modifier avec succès"
+}

@@ -1,0 +1,23 @@
+{
+  "add_title": "Add a Zone",
+  "manage_zone": "Delivery Zone Management",
+  "add_title_text": "Fill in the fields below",
+  "section1_title": "Product Information",
+  "zone": "Zone",
+  "description": "Description",
+  "description_placeholder": "Enter zones separated by commas",
+  "country": "Country",
+  "city": "City",
+  "quarter": "Neighborhoods",
+  "add": "Add Zone",
+  "success": "Zone successfully saved",
+  "error": "An error occurred while creating the zone",
+  "update": "Edit Zone",
+  "updated": "Zone successfully updated",
+  "error_update": "An error occurred while updating the zone",
+  "delete_text": "Warning: This action is irreversible. Deleting this zone will result in the loss of all related data.",
+  "delete_success": "Zone successfully deleted!",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "zone_title": "Zone Label / Municipality"
+}
