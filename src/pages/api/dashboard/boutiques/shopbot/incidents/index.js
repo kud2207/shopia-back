@@ -60,7 +60,6 @@
 
 import dbConnect from 'src/@apiCore/lib/mongodb'
 import Incident from 'src/@apiCore/models/incident'
-import Shop from 'src/@apiCore/models/shop'
 import { withAuth } from 'src/@apiCore/middlewares/authMiddleware'
 import { Types } from 'mongoose'
 
