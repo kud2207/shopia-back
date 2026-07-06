@@ -4,16 +4,28 @@ const { i18n } = require('./next-i18next.config')
 module.exports = {
   trailingSlash: true,
   reactStrictMode: false,
+
+  i18n,
+
   experimental: {
     serverComponentsExternalPackages: ['@react-pdf/renderer'],
     esmExternals: false,
-    forceSwcTransforms: true,
+    forceSwcTransforms: true
   },
-  i18n,
+
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**'
+      }
+    ]
+  },
+
   async headers() {
     return [
       {
-        // matching all API routes
         source: '/api/:path*',
         headers: [
           { key: 'Access-Control-Allow-Credentials', value: 'true' },
@@ -31,51 +43,43 @@ module.exports = {
       }
     ]
   },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-        port: '',
-        pathname: '/**'
-      }
-    ]
-  },
+
   webpack: (config, { isServer, webpack }) => {
+    // 🔥 Aliases propres
     config.resolve.alias = {
       ...config.resolve.alias,
       apexcharts: path.resolve(__dirname, './node_modules/apexcharts-clevision'),
       '@models': path.resolve(__dirname, 'src/@apiCore/models/')
     }
+
+    // 🔥 fallback browser
     if (!isServer) {
-      config.resolve = {
-        ...config.resolve,
-        fallback: {
-          fs: false,
-          path: false,
-          os: false,
-          net: false,
-          dns: false,
-          child_process: false,
-          tls: false,
-          $: 'jquery',
-          jQuery: 'jquery',
-          'window.jQuery': 'jquery'
-        }
+      config.resolve.fallback = {
+        fs: false,
+        path: false,
+        os: false,
+        net: false,
+        dns: false,
+        child_process: false,
+        tls: false
       }
     }
+
+    // 🔥 Provide jQuery (si vraiment utilisé)
     config.plugins.push(
       new webpack.ProvidePlugin({
         $: 'jquery',
-        jQuery: 'jquery',
-        'window.jQuery': 'jquery'
+        jQuery: 'jquery'
       })
     )
+
+    // 🔥 node: compatibility fix
     config.plugins.push(
       new webpack.NormalModuleReplacementPlugin(/^node:/, resource => {
         resource.request = resource.request.replace(/^node:/, '')
       })
-    )    
+    )
+
     return config
   }
 }
