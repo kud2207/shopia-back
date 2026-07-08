@@ -1,12 +1,7 @@
 {
   "functions": {
     "src/pages/api/swagger.json.ts": {
-      "includeFiles": [
-        "src/pages/api/**/*.ts",
-        "src/pages/api/**/*.js",
-        "src/@apiCore/**/*.ts",
-        "src/@apiCore/**/*.js"
-      ]
+      "includeFiles": "src/@apiCore/**/*.ts"
     }
   }
 }
