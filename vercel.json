@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "src/pages/api/swagger.json.ts": {
-      "includeFiles": "src/@apiCore/**/*.ts"
-    }
-  }
-}

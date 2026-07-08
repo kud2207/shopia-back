@@ -10,7 +10,2932 @@
       "url": "http://localhost:3001"
     }
   ],
-  "paths": {},
+  "paths": {
+    "/api/dashboard/stats-dashboard/kpis": {
+      "get": {
+        "summary": "Récupérer les KPIs du dashboard",
+        "description": "Retourne tous les indicateurs clés de performance (KPIs) avec leurs tendances.\n\n**Période de calcul** : Mois en cours vs Mois précédent\n",
+        "tags": [
+          "stats-dashboard"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KPIs récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "KPIs récupérés avec succès"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "abonnes_actifs": {
+                          "type": "integer",
+                          "description": "Nombre total d'abonnés actifs",
+                          "example": 33945
+                        },
+                        "abonnes_actifs_tendance": {
+                          "type": "number",
+                          "description": "Pourcentage d'évolution vs mois précédent",
+                          "example": 1.1
+                        },
+                        "nouvelles_inscriptions": {
+                          "type": "integer",
+                          "description": "Nouvelles inscriptions ce mois",
+                          "example": 353
+                        },
+                        "nouvelles_inscriptions_tendance": {
+                          "type": "number",
+                          "description": "Pourcentage d'évolution vs mois précédent",
+                          "example": -33.4
+                        },
+                        "boutiques_actives": {
+                          "type": "integer",
+                          "description": "Nombre total de boutiques actives",
+                          "example": 8
+                        },
+                        "commandes_traitees": {
+                          "type": "integer",
+                          "description": "Nombre de commandes ce mois",
+                          "example": 293
+                        },
+                        "commandes_traitees_tendance": {
+                          "type": "number",
+                          "description": "Pourcentage d'évolution vs mois précédent",
+                          "example": -35.3
+                        },
+                        "ca_global": {
+                          "type": "integer",
+                          "description": "Chiffre d'affaires global (arrondi)",
+                          "example": 0
+                        },
+                        "transactions_attente": {
+                          "type": "integer",
+                          "description": "Paiements en statut \"Processing\"",
+                          "example": 0
+                        },
+                        "tickets_ouverts": {
+                          "type": "integer",
+                          "description": "Tickets avec statut \"open\" ou \"in_progress\"",
+                          "example": 0
+                        },
+                        "taux_livraison_reussie": {
+                          "type": "number",
+                          "description": "Pourcentage de commandes livrées avec succès",
+                          "example": 0
+                        },
+                        "ca_abonnements": {
+                          "type": "integer",
+                          "description": "Revenus des abonnements ce mois (arrondi)",
+                          "example": 1609
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token d'authentification requis ou invalide"
+          },
+          "405": {
+            "description": "Méthode non autorisée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Méthode non autorisée"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur serveur"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/stats-dashboard/charts/revenus": {
+      "get": {
+        "summary": "Revenus par module",
+        "description": "Retourne les revenus (CA) par type de module/boutique pour chaque période.\n\n**Périodes disponibles** :\n- `7d` : 7 derniers jours (regroupement par jour)\n- `2w` : 2 dernières semaines (regroupement par jour)\n- `4m` : 4 derniers mois (regroupement par mois) - **défaut**\n- `12m` : 12 derniers mois (regroupement par mois)\n\n**Types de modules** :\n- 🏪 Marchands : boutiques de type \"product\", \"marchand\", \"ecommerce\"\n- 🚚 Livraison : boutiques de type \"delivery\", \"livraison\"\n- 🛠️ Prestataires : boutiques de type \"service\", \"prestataire\"\n\n**Note** : Seules les commandes \"Livrée\" et \"Terminée\" sont comptabilisées.\n",
+        "tags": [
+          "stats-dashboard"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "7d",
+                "2w",
+                "4m",
+                "12m"
+              ],
+              "default": "4m"
+            },
+            "description": "Période à afficher (jours, semaines ou mois)",
+            "example": "4m"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Données récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Succès"
+                    },
+                    "data": {
+                      "type": "array",
+                      "description": "Liste des revenus par période et par module",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "mois": {
+                            "type": "string",
+                            "description": "Label de la période (jour ou mois selon le paramètre period)",
+                            "example": "juin"
+                          },
+                          "marchands": {
+                            "type": "integer",
+                            "description": "Revenus des boutiques marchands (arrondi)",
+                            "example": 120000
+                          },
+                          "livraison": {
+                            "type": "integer",
+                            "description": "Revenus des boutiques livraison (arrondi)",
+                            "example": 80000
+                          },
+                          "prestataires": {
+                            "type": "integer",
+                            "description": "Revenus des boutiques prestataires (arrondi)",
+                            "example": 40000
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "mois": "mars",
+                          "marchands": 120000,
+                          "livraison": 80000,
+                          "prestataires": 40000
+                        },
+                        {
+                          "mois": "avr.",
+                          "marchands": 135000,
+                          "livraison": 85000,
+                          "prestataires": 45000
+                        },
+                        {
+                          "mois": "mai",
+                          "marchands": 150000,
+                          "livraison": 90000,
+                          "prestataires": 50000
+                        },
+                        {
+                          "mois": "juin",
+                          "marchands": 180000,
+                          "livraison": 95000,
+                          "prestataires": 55000
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token d'authentification requis ou invalide"
+          },
+          "403": {
+            "description": "Permissions insuffisantes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Permissions insuffisantes"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Méthode non autorisée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Méthode non autorisée"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur serveur"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/stats-dashboard/charts/profils": {
+      "get": {
+        "summary": "Répartition des profils utilisateurs",
+        "description": "Retourne la répartition en pourcentage des utilisateurs actifs par type de profil.\n\n**Profils comptabilisés** :\n- 🏪 Marchands (rôle \"marchand\")\n- 🚚 Livraison (rôle \"livraison\")\n- 🛠️ Prestataires (rôle \"prestataire\")\n\n**Note** : La somme des 3 pourcentages est égale à 100%.\nSeuls les utilisateurs actifs sont pris en compte.\n",
+        "tags": [
+          "stats-dashboard"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Répartition récupérée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Succès"
+                    },
+                    "data": {
+                      "type": "object",
+                      "description": "Répartition en pourcentage par type de profil",
+                      "properties": {
+                        "marchands": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "Pourcentage d'utilisateurs avec le rôle \"marchand\"",
+                          "example": 62.5
+                        },
+                        "livraison": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "Pourcentage d'utilisateurs avec le rôle \"livraison\"",
+                          "example": 23.3
+                        },
+                        "prestataires": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "Pourcentage d'utilisateurs avec le rôle \"prestataire\"",
+                          "example": 14.2
+                        }
+                      },
+                      "example": {
+                        "marchands": 62.5,
+                        "livraison": 23.3,
+                        "prestataires": 14.2
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token d'authentification requis ou invalide"
+          },
+          "403": {
+            "description": "Permissions insuffisantes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Permissions insuffisantes"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Méthode non autorisée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Méthode non autorisée"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur serveur"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/stats-dashboard/charts/livraison": {
+      "get": {
+        "summary": "Taux de livraison",
+        "description": "Retourne le nombre de commandes livrées et non livrées par période.\n\n**Périodes disponibles** :\n- `7d` : 7 derniers jours (regroupement par jour)\n- `2w` : 2 dernières semaines (regroupement par jour)\n- `4m` : 4 derniers mois (regroupement par mois) - **défaut**\n- `12m` : 12 derniers mois (regroupement par mois)\n\n**Statuts pris en compte** :\n- ✅ Livrées : statut \"Livrée\"\n- ❌ Non livrées : statuts \"Non livrée\" et \"Annulée\"\n",
+        "tags": [
+          "stats-dashboard"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "7d",
+                "2w",
+                "4m",
+                "12m"
+              ],
+              "default": "4m"
+            },
+            "description": "Période à afficher (jours, semaines ou mois)",
+            "example": "4m"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Données récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Succès"
+                    },
+                    "data": {
+                      "type": "array",
+                      "description": "Liste des livraisons par période",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "mois": {
+                            "type": "string",
+                            "description": "Label de la période (jour ou mois selon le paramètre period)",
+                            "example": "juin"
+                          },
+                          "livrees": {
+                            "type": "integer",
+                            "description": "Nombre de commandes livrées",
+                            "example": 85
+                          },
+                          "non_livrees": {
+                            "type": "integer",
+                            "description": "Nombre de commandes non livrées (inclut \"Non livrée\" et \"Annulée\")",
+                            "example": 15
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "mois": "mars",
+                          "livrees": 120,
+                          "non_livrees": 30
+                        },
+                        {
+                          "mois": "avr.",
+                          "livrees": 145,
+                          "non_livrees": 25
+                        },
+                        {
+                          "mois": "mai",
+                          "livrees": 180,
+                          "non_livrees": 20
+                        },
+                        {
+                          "mois": "juin",
+                          "livrees": 210,
+                          "non_livrees": 18
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token d'authentification requis ou invalide"
+          },
+          "403": {
+            "description": "Permissions insuffisantes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Permissions insuffisantes"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Méthode non autorisée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Méthode non autorisée"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur serveur"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/stats-dashboard/charts/inscriptions": {
+      "get": {
+        "summary": "Évolution des inscriptions",
+        "description": "Retourne le nombre de nouvelles inscriptions par période (jour, semaine ou mois).\n\n**Périodes disponibles** :\n- `7d` : 7 derniers jours (regroupement par jour)\n- `2w` : 2 dernières semaines (regroupement par jour)\n- `4m` : 4 derniers mois (regroupement par mois) - **défaut**\n- `12m` : 12 derniers mois (regroupement par mois)\n",
+        "tags": [
+          "stats-dashboard"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "7d",
+                "2w",
+                "4m",
+                "12m"
+              ],
+              "default": "4m"
+            },
+            "description": "Période à afficher (jours, semaines ou mois)",
+            "example": "4m"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Données récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Succès"
+                    },
+                    "data": {
+                      "type": "array",
+                      "description": "Liste des inscriptions par période",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "mois": {
+                            "type": "string",
+                            "description": "Label de la période (jour ou mois selon le paramètre period)",
+                            "example": "juin"
+                          },
+                          "value": {
+                            "type": "integer",
+                            "description": "Nombre d'inscriptions pour cette période",
+                            "example": 353
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "mois": "mars",
+                          "value": 150
+                        },
+                        {
+                          "mois": "avr.",
+                          "value": 220
+                        },
+                        {
+                          "mois": "mai",
+                          "value": 180
+                        },
+                        {
+                          "mois": "juin",
+                          "value": 353
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token d'authentification requis ou invalide"
+          },
+          "403": {
+            "description": "Permissions insuffisantes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Permissions insuffisantes"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Méthode non autorisée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Méthode non autorisée"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur serveur"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/stats-dashboard/charts/commandes": {
+      "get": {
+        "summary": "Volume des commandes",
+        "description": "Retourne le nombre de commandes par période (jour, semaine ou mois).\n\n**Périodes disponibles** :\n- `7d` : 7 derniers jours (regroupement par jour)\n- `2w` : 2 dernières semaines (regroupement par jour)\n- `4m` : 4 derniers mois (regroupement par mois) - **défaut**\n- `12m` : 12 derniers mois (regroupement par mois)\n",
+        "tags": [
+          "stats-dashboard"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "7d",
+                "2w",
+                "4m",
+                "12m"
+              ],
+              "default": "4m"
+            },
+            "description": "Période à afficher (jours, semaines ou mois)",
+            "example": "4m"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Données récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Succès"
+                    },
+                    "data": {
+                      "type": "array",
+                      "description": "Liste des volumes de commandes par période",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "mois": {
+                            "type": "string",
+                            "description": "Label de la période (jour ou mois selon le paramètre period)",
+                            "example": "juin"
+                          },
+                          "value": {
+                            "type": "integer",
+                            "description": "Nombre de commandes pour cette période",
+                            "example": 293
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "mois": "mars",
+                          "value": 150
+                        },
+                        {
+                          "mois": "avr.",
+                          "value": 220
+                        },
+                        {
+                          "mois": "mai",
+                          "value": 180
+                        },
+                        {
+                          "mois": "juin",
+                          "value": 293
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token d'authentification requis ou invalide"
+          },
+          "403": {
+            "description": "Permissions insuffisantes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Permissions insuffisantes"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Méthode non autorisée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Méthode non autorisée"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur serveur"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/stats": {
+      "get": {
+        "summary": "Statistiques globales des boutiques",
+        "description": "Retourne les 4 KPIs principaux du module Boutiques avec leurs tendances mensuelles.\n\n**KPIs retournés** :\n- Total des boutiques (tous types confondus)\n- E-commerçants (type: \"product\", \"marchand\", \"ecommerce\")\n- Services de livraison (type: \"delivery\", \"livraison\")\n- Prestataires (type: \"service\", \"prestataire\")\n\n**Période de calcul** : Mois en cours vs Mois précédent\n",
+        "tags": [
+          "Boutiques"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistiques récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Statistiques récupérées avec succès"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "total_boutiques": {
+                          "type": "integer",
+                          "description": "Nombre total de boutiques actives",
+                          "example": 10
+                        },
+                        "total_boutiques_tendance": {
+                          "type": "number",
+                          "description": "Pourcentage d'évolution vs mois précédent",
+                          "example": 5
+                        },
+                        "e_commercants": {
+                          "type": "integer",
+                          "description": "Nombre de boutiques e-commerce",
+                          "example": 100
+                        },
+                        "e_commercants_tendance": {
+                          "type": "number",
+                          "description": "Pourcentage d'évolution vs mois précédent",
+                          "example": 20
+                        },
+                        "services_livraison": {
+                          "type": "integer",
+                          "description": "Nombre de services de livraison",
+                          "example": 10
+                        },
+                        "services_livraison_tendance": {
+                          "type": "number",
+                          "description": "Pourcentage d'évolution vs mois précédent",
+                          "example": 3
+                        },
+                        "prestataires": {
+                          "type": "integer",
+                          "description": "Nombre de prestataires de services",
+                          "example": 50
+                        },
+                        "prestataires_tendance": {
+                          "type": "number",
+                          "description": "Pourcentage d'évolution vs mois précédent",
+                          "example": -10
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token d'authentification requis ou invalide"
+          },
+          "403": {
+            "description": "Permissions insuffisantes"
+          },
+          "500": {
+            "description": "Erreur serveur"
+          }
+        }
+      }
+    },
+    "/api/boutiques/shopbot/statuts": {
+      "get": {
+        "summary": "Statuts des bots par boutique",
+        "description": "Liste toutes les boutiques avec le statut de leur bot ShopBot",
+        "tags": [
+          "ShopBot"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statuts récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "boutique": {
+                            "type": "string"
+                          },
+                          "statut": {
+                            "type": "string",
+                            "enum": [
+                              "Actif",
+                              "Erreur",
+                              "Inactif"
+                            ]
+                          },
+                          "interactions": {
+                            "type": "integer"
+                          },
+                          "taux_conversion": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/shopbot/stats": {
+      "get": {
+        "summary": "Statistiques globales ShopBot",
+        "description": "Retourne les KPIs globaux de l'assistant IA ShopBot.\n\n**Métriques** :\n- Statut global (actif/inactif/erreur)\n- Nombre d'interactions\n- Commandes générées\n- Taux de conversion\n",
+        "tags": [
+          "ShopBot"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "boutique_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrer par boutique (optionnel)"
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month",
+                "year"
+              ],
+              "default": "month"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistiques récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "statut_global": {
+                          "type": "string",
+                          "enum": [
+                            "actif",
+                            "inactif",
+                            "erreur"
+                          ],
+                          "example": "actif"
+                        },
+                        "interactions": {
+                          "type": "integer",
+                          "example": 1200
+                        },
+                        "interactions_tendance": {
+                          "type": "number",
+                          "example": 25
+                        },
+                        "commandes_generees": {
+                          "type": "integer",
+                          "example": 250
+                        },
+                        "commandes_generees_tendance": {
+                          "type": "number",
+                          "example": 22
+                        },
+                        "taux_conversion": {
+                          "type": "number",
+                          "example": 30
+                        },
+                        "taux_conversion_tendance": {
+                          "type": "number",
+                          "example": 5
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/shopbot/campagnes": {
+      "get": {
+        "summary": "Campagnes WhatsApp actives",
+        "description": "Liste les campagnes WhatsApp en cours et planifiées",
+        "tags": [
+          "ShopBot"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "boutique_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "active",
+                "planifiee",
+                "terminee"
+              ],
+              "default": "all"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Campagnes récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "nom": {
+                            "type": "string"
+                          },
+                          "boutique": {
+                            "type": "string"
+                          },
+                          "statut": {
+                            "type": "string",
+                            "enum": [
+                              "Active",
+                              "Planifiée",
+                              "Pause",
+                              "Terminée"
+                            ]
+                          },
+                          "date_debut": {
+                            "type": "string",
+                            "format": "date"
+                          },
+                          "date_fin": {
+                            "type": "string",
+                            "format": "date"
+                          },
+                          "destinataires": {
+                            "type": "integer"
+                          },
+                          "taux_ouverture": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/produits": {
+      "get": {
+        "summary": "Catalogue des produits",
+        "description": "Retourne la liste des produits avec leur statut de stock.\n\n**Statuts de stock** :\n- `disponible` : Stock > 10\n- `stock_faible` : Stock entre 1 et 10\n- `epuise` : Stock = 0\n",
+        "tags": [
+          "Boutiques"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "boutique_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrer par boutique"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche par nom de produit"
+          },
+          {
+            "in": "query",
+            "name": "stock_status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "disponible",
+                "epuise",
+                "stock_faible"
+              ],
+              "default": "all"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Produits récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "nom": {
+                                "type": "string"
+                              },
+                              "image": {
+                                "type": "string"
+                              },
+                              "prix": {
+                                "type": "number"
+                              },
+                              "stock": {
+                                "type": "integer"
+                              },
+                              "vendu": {
+                                "type": "integer"
+                              },
+                              "echange": {
+                                "type": "integer"
+                              },
+                              "stock_status": {
+                                "type": "string"
+                              },
+                              "boutique": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/produits/stock-assigne": {
+      "get": {
+        "summary": "Stock assigné par livreur",
+        "description": "Retourne le stock de produits assigné à chaque livreur",
+        "tags": [
+          "Boutiques"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "boutique_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "livreur_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stock assigné récupéré",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "produit": {
+                            "type": "string"
+                          },
+                          "livreur": {
+                            "type": "string"
+                          },
+                          "quantite_assignee": {
+                            "type": "integer"
+                          },
+                          "vendue": {
+                            "type": "integer"
+                          },
+                          "echangee": {
+                            "type": "integer"
+                          },
+                          "reste": {
+                            "type": "integer"
+                          },
+                          "alerte": {
+                            "type": "string",
+                            "enum": [
+                              "disponible",
+                              "epuise",
+                              "stock_faible"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/produits/stock-assigne/performants": {
+      "get": {
+        "summary": "Produits performants",
+        "description": "Retourne les produits les plus vendus triés par volume de vente.\n\n**Périodes disponibles** :\n- `today` : Aujourd'hui\n- `week` : Cette semaine\n- `month` : Ce mois (défaut)\n- `year` : Cette année\n",
+        "tags": [
+          "Boutiques"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "boutique_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month",
+                "year"
+              ],
+              "default": "month"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Produits performants récupérés",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "rang": {
+                            "type": "integer"
+                          },
+                          "produit": {
+                            "type": "string"
+                          },
+                          "ventes": {
+                            "type": "integer"
+                          },
+                          "pourcentage": {
+                            "type": "number"
+                          },
+                          "revenu": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/prestataires/stats": {
+      "get": {
+        "summary": "Statistiques globales des prestataires de service",
+        "description": "Retourne les KPIs agrégés pour le suivi des prestataires de service.\n\n**Métriques** :\n- Prestataires actifs\n- RDV actifs\n- Réservations\n- Taux d'occupation\n",
+        "tags": [
+          "Prestataires"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month",
+                "year"
+              ],
+              "default": "month"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistiques récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "prestataires_actifs": {
+                          "type": "integer",
+                          "example": 10
+                        },
+                        "prestataires_actifs_tendance": {
+                          "type": "number",
+                          "example": 3
+                        },
+                        "rdv_actifs": {
+                          "type": "integer",
+                          "example": 50
+                        },
+                        "rdv_actifs_tendance": {
+                          "type": "number",
+                          "example": 5
+                        },
+                        "reservations": {
+                          "type": "integer",
+                          "example": 30
+                        },
+                        "reservations_tendance": {
+                          "type": "number",
+                          "example": 8
+                        },
+                        "taux_occupation": {
+                          "type": "number",
+                          "example": 76.5
+                        },
+                        "taux_occupation_tendance": {
+                          "type": "number",
+                          "example": 3
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/prestataires/liste": {
+      "get": {
+        "summary": "Liste des prestataires de service",
+        "description": "Tableau de suivi détaillé par prestataire avec toutes les métriques",
+        "tags": [
+          "Prestataires"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "medecin",
+                "hotel",
+                "restaurant",
+                "salon",
+                "autre"
+              ],
+              "default": "all"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche par nom de prestataire"
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month",
+                "year"
+              ],
+              "default": "month"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prestataires récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "prestataire": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "rdv_actifs": {
+                                "type": "integer"
+                              },
+                              "reservations": {
+                                "type": "integer"
+                              },
+                              "taux_occupation": {
+                                "type": "number"
+                              },
+                              "annules_non_honores": {
+                                "type": "integer"
+                              },
+                              "bot_whatsapp": {
+                                "type": "string",
+                                "enum": [
+                                  "actif",
+                                  "inactif"
+                                ]
+                              },
+                              "campagnes": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/prestataires/campagnes": {
+      "get": {
+        "summary": "Campagnes WhatsApp des prestataires",
+        "description": "Liste les campagnes WhatsApp actives et terminées des prestataires",
+        "tags": [
+          "Prestataires"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month",
+                "year"
+              ],
+              "default": "month"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "active",
+                "en_pause",
+                "terminee"
+              ],
+              "default": "all"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Campagnes récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "prestataire": {
+                                "type": "string"
+                              },
+                              "campagne": {
+                                "type": "string"
+                              },
+                              "messages_envoyes": {
+                                "type": "integer"
+                              },
+                              "taux_ouverture": {
+                                "type": "number"
+                              },
+                              "statut": {
+                                "type": "string",
+                                "enum": [
+                                  "active",
+                                  "en_pause",
+                                  "terminee"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/livraison/stats": {
+      "get": {
+        "summary": "Statistiques globales des services de livraison",
+        "description": "Retourne les KPIs agrégés pour le suivi des entreprises de livraison.\n\n**Métriques** :\n- Partenaires actifs\n- Commandes du mois\n- Montant collecté\n- Taux de livraison\n",
+        "tags": [
+          "Livraison"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month",
+                "year"
+              ],
+              "default": "month"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistiques récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "partenaires_actifs": {
+                          "type": "integer",
+                          "example": 100
+                        },
+                        "partenaires_actifs_tendance": {
+                          "type": "number",
+                          "example": 5
+                        },
+                        "commandes_mois": {
+                          "type": "integer",
+                          "example": 50
+                        },
+                        "commandes_mois_tendance": {
+                          "type": "number",
+                          "example": 8
+                        },
+                        "montant_collecte": {
+                          "type": "number",
+                          "example": 100000
+                        },
+                        "montant_collecte_tendance": {
+                          "type": "number",
+                          "example": 3
+                        },
+                        "taux_livraison": {
+                          "type": "number",
+                          "example": 88.5
+                        },
+                        "taux_livraison_tendance": {
+                          "type": "number",
+                          "example": 3
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/livraison/incidents": {
+      "get": {
+        "summary": "Incidents de livraison - Commandes non livrées",
+        "description": "Liste des commandes non livrées avec les motifs",
+        "tags": [
+          "Livraison"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month",
+                "year"
+              ],
+              "default": "month"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche par ID commande ou boutique"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Incidents récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id_commande": {
+                                "type": "string"
+                              },
+                              "boutique_partenaire": {
+                                "type": "string"
+                              },
+                              "livreur": {
+                                "type": "string"
+                              },
+                              "motif": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string",
+                                "format": "date"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/livraison/entreprises": {
+      "get": {
+        "summary": "Suivi des entreprises de livraison",
+        "description": "Tableau de suivi détaillé par entreprise avec toutes les métriques financières",
+        "tags": [
+          "Livraison"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche par nom d'entreprise"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all_partenaires",
+                "actifs",
+                "inactifs"
+              ],
+              "default": "all_partenaires"
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month",
+                "year"
+              ],
+              "default": "month"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entreprises récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "entreprise": {
+                                "type": "string"
+                              },
+                              "partenaires": {
+                                "type": "integer"
+                              },
+                              "cmd_mois": {
+                                "type": "integer"
+                              },
+                              "stock_gere": {
+                                "type": "integer"
+                              },
+                              "montant_collecte": {
+                                "type": "number"
+                              },
+                              "commission": {
+                                "type": "number"
+                              },
+                              "reverse": {
+                                "type": "number"
+                              },
+                              "depenses": {
+                                "type": "number"
+                              },
+                              "taux_livraison": {
+                                "type": "number"
+                              },
+                              "taux_livraison_statut": {
+                                "type": "string",
+                                "enum": [
+                                  "bon",
+                                  "moyen",
+                                  "critique"
+                                ]
+                              },
+                              "incidents": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/livraison/depenses": {
+      "get": {
+        "summary": "Dépenses enregistrées des entreprises de livraison",
+        "description": "Retourne le détail des dépenses par catégorie pour chaque entreprise",
+        "tags": [
+          "Livraison"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month",
+                "year"
+              ],
+              "default": "month"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dépenses récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "entreprise": {
+                            "type": "string"
+                          },
+                          "carburant": {
+                            "type": "number"
+                          },
+                          "communication": {
+                            "type": "number"
+                          },
+                          "frais_divers": {
+                            "type": "number"
+                          },
+                          "total_depenses": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/boutiques/commandes": {
+      "get": {
+        "summary": "Liste de toutes les commandes",
+        "description": "Liste paginée des commandes de toutes les boutiques",
+        "tags": [
+          "Boutiques"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "boutique_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrer par boutique (optionnel)"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "en_attente",
+                "en_cours",
+                "livree",
+                "non_livree"
+              ],
+              "default": "all"
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "week",
+                "month",
+                "year"
+              ],
+              "default": "month"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Commandes récupérées"
+          }
+        }
+      }
+    },
+    "/api/dashboard/admins/register": {
+      "get": {
+        "summary": "Liste des administrateurs",
+        "description": "Récupère la liste paginée des administrateurs avec filtres optionnels",
+        "tags": [
+          "Admin Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Numéro de page",
+            "example": 1
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Nombre d'éléments par page",
+            "example": 20
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche par nom, prénom ou email",
+            "example": "ultiche"
+          },
+          {
+            "in": "query",
+            "name": "role",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "super_admin",
+                "admin_support",
+                "admin_financier",
+                "admin_commercial"
+              ]
+            },
+            "description": "Filtrer par rôle",
+            "example": "super_admin"
+          },
+          {
+            "in": "query",
+            "name": "active",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filtrer par statut actif",
+            "example": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des administrateurs récupérée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Liste des administrateurs récupérée avec succès"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "admins": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "_id": {
+                                "type": "string",
+                                "example": "64fd1234567890abcdef12345"
+                              },
+                              "nom": {
+                                "type": "string",
+                                "example": "Kageu"
+                              },
+                              "prenom": {
+                                "type": "string",
+                                "example": "Ultiche"
+                              },
+                              "email": {
+                                "type": "string",
+                                "example": "ultiche@shopia.com"
+                              },
+                              "role": {
+                                "type": "string",
+                                "example": "super_admin"
+                              },
+                              "active": {
+                                "type": "boolean",
+                                "example": true
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "example": "/images/avatars/admin.png"
+                              },
+                              "authProvider": {
+                                "type": "string",
+                                "example": "local"
+                              },
+                              "permissions": {
+                                "type": "object",
+                                "properties": {
+                                  "dashboard": {
+                                    "type": "boolean",
+                                    "example": true
+                                  },
+                                  "boutiques": {
+                                    "type": "boolean",
+                                    "example": true
+                                  },
+                                  "finances": {
+                                    "type": "boolean",
+                                    "example": true
+                                  },
+                                  "utilisateurs": {
+                                    "type": "boolean",
+                                    "example": true
+                                  },
+                                  "tickets": {
+                                    "type": "boolean",
+                                    "example": true
+                                  },
+                                  "rapports": {
+                                    "type": "boolean",
+                                    "example": true
+                                  }
+                                }
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "updatedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "integer",
+                              "example": 5
+                            },
+                            "page": {
+                              "type": "integer",
+                              "example": 1
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "example": 20
+                            },
+                            "pages": {
+                              "type": "integer",
+                              "example": 1
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token d'authentification requis ou invalide"
+          },
+          "403": {
+            "description": "Permissions insuffisantes (rôle super_admin requis)"
+          },
+          "405": {
+            "description": "Méthode non autorisée"
+          },
+          "500": {
+            "description": "Erreur serveur"
+          }
+        }
+      },
+      "post": {
+        "summary": "Créer un administrateur",
+        "description": "Crée un nouvel administrateur.\n\n- **Premier admin** : Pas de token requis, rôle forcé à super_admin, token retourné automatiquement\n- **Admins suivants** : Token super_admin requis\n",
+        "tags": [
+          "Admin Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nom",
+                  "prenom",
+                  "email",
+                  "role"
+                ],
+                "properties": {
+                  "nom": {
+                    "type": "string",
+                    "minLength": 2,
+                    "example": "Kageu"
+                  },
+                  "prenom": {
+                    "type": "string",
+                    "minLength": 2,
+                    "example": "Ultiche"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "ultiche@shopia.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 6,
+                    "description": "Requis uniquement si authProvider = local",
+                    "example": "Azerty123"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "super_admin",
+                      "admin_support",
+                      "admin_financier",
+                      "admin_commercial"
+                    ],
+                    "example": "admin_support"
+                  },
+                  "authProvider": {
+                    "type": "string",
+                    "enum": [
+                      "local",
+                      "google"
+                    ],
+                    "default": "local",
+                    "example": "local"
+                  },
+                  "googleId": {
+                    "type": "string",
+                    "description": "Requis uniquement si authProvider = google",
+                    "example": 109238471923847
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "description": "URL de l'avatar (optionnel)",
+                    "example": "/images/avatars/custom.png"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Administrateur créé avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "description": "Premier administrateur (avec token)",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "✅ Premier administrateur créé avec succès"
+                        },
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "_id": {
+                              "type": "string",
+                              "example": "64fd1234567890abcdef12345"
+                            },
+                            "nom": {
+                              "type": "string",
+                              "example": "Kageu"
+                            },
+                            "prenom": {
+                              "type": "string",
+                              "example": "Ultiche"
+                            },
+                            "email": {
+                              "type": "string",
+                              "example": "ultiche@shopia.com"
+                            },
+                            "role": {
+                              "type": "string",
+                              "example": "super_admin"
+                            },
+                            "active": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "authProvider": {
+                              "type": "string",
+                              "example": "local"
+                            },
+                            "permissions": {
+                              "type": "object",
+                              "properties": {
+                                "dashboard": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "boutiques": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "finances": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "utilisateurs": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "tickets": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "rapports": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "token": {
+                          "type": "string",
+                          "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        },
+                        "isFirstAdmin": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "description": "Admins suivants (sans token)",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Administrateur créé avec succès"
+                        },
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "_id": {
+                              "type": "string",
+                              "example": "64fd1234567890abcdef12345"
+                            },
+                            "nom": {
+                              "type": "string",
+                              "example": "Support"
+                            },
+                            "prenom": {
+                              "type": "string",
+                              "example": "Alice"
+                            },
+                            "email": {
+                              "type": "string",
+                              "example": "alice@shopia.com"
+                            },
+                            "role": {
+                              "type": "string",
+                              "example": "admin_support"
+                            },
+                            "active": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "authProvider": {
+                              "type": "string",
+                              "example": "local"
+                            },
+                            "permissions": {
+                              "type": "object",
+                              "properties": {
+                                "dashboard": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "boutiques": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "finances": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "utilisateurs": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "tickets": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "rapports": {
+                                  "type": "boolean",
+                                  "example": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "description": "Cookie défini uniquement pour le premier admin",
+                  "example": "adminToken=eyJhbGciOi...; Path=/; HttpOnly; SameSite=Strict; Max-Age=315360000"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides ou email déjà utilisé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "description": "Erreurs de validation",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Données invalides"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "example": [
+                            "Le nom doit contenir au moins 2 caractères",
+                            "Email invalide"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "description": "Email déjà utilisé",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Un administrateur avec cet email existe déjà"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token d'authentification requis (pour admins suivants)"
+          },
+          "403": {
+            "description": "Permissions insuffisantes (rôle super_admin requis)"
+          },
+          "405": {
+            "description": "Méthode non autorisée"
+          },
+          "500": {
+            "description": "Erreur serveur"
+          }
+        }
+      }
+    },
+    "/api/dashboard/admins/logout": {
+      "post": {
+        "summary": "Déconnexion administrateur",
+        "description": "Déconnecte l'administrateur en supprimant le cookie d'authentification",
+        "tags": [
+          "Admin Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "Déconnexion réussie",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "adminToken=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Déconnecté avec succès"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Méthode non autorisée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Méthode non autorisée"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur lors de la déconnexion"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/admins/login": {
+      "post": {
+        "summary": "Connexion administrateur",
+        "tags": [
+          "Admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Connexion réussie"
+          }
+        }
+      }
+    },
+    "/api/dashboard/admins/auth": {
+      "get": {
+        "summary": "Vérifier l'authentification",
+        "description": "Vérifie si le token JWT est valide.\nLe frontend appelle cet endpoint pour décider de bloquer ou non une route.\n",
+        "tags": [
+          "Admin Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token valide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Authentification valide"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token invalide ou manquant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Token invalide ou expiré"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "components": {},
   "tags": []
 }
