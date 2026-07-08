@@ -12,7 +12,7 @@
  *       - Commandes générées
  *       - Taux de conversion
  *     tags:
- *       - ShopBot
+ *       - Boutiques - ShopBot
  *     security:
  *       - bearerAuth: []
  *

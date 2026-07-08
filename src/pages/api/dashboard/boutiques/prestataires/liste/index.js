@@ -5,7 +5,7 @@
  *     summary: Liste des prestataires de service
  *     description: Tableau de suivi détaillé par prestataire avec toutes les métriques
  *     tags:
- *       - Prestataires
+ *       - Boutiques - Prestataires
  *     security:
  *       - bearerAuth: []
  *

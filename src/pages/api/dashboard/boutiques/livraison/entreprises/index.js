@@ -5,7 +5,7 @@
  *     summary: Suivi des entreprises de livraison
  *     description: Tableau de suivi détaillé par entreprise avec toutes les métriques financières
  *     tags:
- *       - Livraison
+ *       - Boutiques - Livraison
  *     security:
  *       - bearerAuth: []
  *

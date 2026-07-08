@@ -5,7 +5,7 @@
  *     summary: Statuts des bots par boutique
  *     description: Liste toutes les boutiques avec le statut de leur bot ShopBot
  *     tags:
- *       - ShopBot
+ *       - Boutiques - ShopBot
  *     security:
  *       - bearerAuth: []
  *

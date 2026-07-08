@@ -2866,12 +2866,98 @@
     "/api/dashboard/admins/login": {
       "post": {
         "summary": "Connexion administrateur",
+        "description": "Authentification admin par email/mot de passe ou Google",
         "tags": [
-          "Admin"
+          "Admin Authentication"
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "admin@shopia.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  },
+                  "googleId": {
+                    "type": "string",
+                    "example": 109238471923847
+                  },
+                  "authProvider": {
+                    "type": "string",
+                    "enum": [
+                      "local",
+                      "google"
+                    ],
+                    "example": "local"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Connexion réussie"
+            "description": "Connexion réussie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Connecté avec succès"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1Ni..."
+                    },
+                    "authProvider": {
+                      "type": "string",
+                      "example": "local"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "_id": {
+                          "type": "string",
+                          "example": "64fd123456789"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "admin@shopia.com"
+                        },
+                        "role": {
+                          "type": "string",
+                          "example": "admin"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Données invalides"
+          },
+          "401": {
+            "description": "Identifiants incorrects ou compte Google introuvable"
+          },
+          "403": {
+            "description": "Compte désactivé"
+          },
+          "405": {
+            "description": "Méthode non autorisée"
+          },
+          "500": {
+            "description": "Erreur serveur"
           }
         }
       }

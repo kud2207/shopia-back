@@ -12,7 +12,7 @@
  *       - Montant collecté
  *       - Taux de livraison
  *     tags:
- *       - Livraison
+ *       - Boutiques - Livraison
  *     security:
  *       - bearerAuth: []
  *

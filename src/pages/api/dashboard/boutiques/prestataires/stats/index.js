@@ -12,7 +12,7 @@
  *       - Réservations
  *       - Taux d'occupation
  *     tags:
- *       - Prestataires
+ *       - Boutiques - Prestataires
  *     security:
  *       - bearerAuth: []
  *

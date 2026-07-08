@@ -5,7 +5,7 @@
  *     summary: Incidents de livraison - Commandes non livrées
  *     description: Liste des commandes non livrées avec les motifs
  *     tags:
- *       - Livraison
+ *       - Boutiques - Livraison
  *     security:
  *       - bearerAuth: []
  *

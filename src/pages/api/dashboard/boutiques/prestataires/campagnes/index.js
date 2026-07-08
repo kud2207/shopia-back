@@ -5,7 +5,7 @@
  *     summary: Campagnes WhatsApp des prestataires
  *     description: Liste les campagnes WhatsApp actives et terminées des prestataires
  *     tags:
- *       - Prestataires
+ *       - Boutiques - Prestataires
  *     security:
  *       - bearerAuth: []
  *

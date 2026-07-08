@@ -5,7 +5,7 @@
  *     summary: Dépenses enregistrées des entreprises de livraison
  *     description: Retourne le détail des dépenses par catégorie pour chaque entreprise
  *     tags:
- *       - Livraison
+ *       - Boutiques - Livraison
  *     security:
  *       - bearerAuth: []
  *

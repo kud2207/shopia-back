@@ -5,7 +5,7 @@
  *     summary: Campagnes WhatsApp actives
  *     description: Liste les campagnes WhatsApp en cours et planifiées
  *     tags:
- *       - ShopBot
+ *       - Boutiques - ShopBot
  *     security:
  *       - bearerAuth: []
  *
