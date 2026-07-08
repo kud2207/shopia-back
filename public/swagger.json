@@ -1,0 +1,16 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ShopIA API",
+    "version": "1.0.0",
+    "description": "Documentation API ShopIA Dashboard"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001"
+    }
+  ],
+  "paths": {},
+  "components": {},
+  "tags": []
+}
