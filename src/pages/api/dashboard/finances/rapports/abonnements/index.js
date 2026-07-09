@@ -11,7 +11,7 @@
  *       - Taux de renouvellement
  *       - Formules premium actives
  *     tags:
- *       -Finances - Rapports Financiers
+ *       - Finances - Rapports Financiers
  *     security:
  *       - bearerAuth: []
  *
