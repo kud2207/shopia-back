@@ -1,6 +1,6 @@
 /**
  * @swagger
- * /api/boutiques/stats:
+ * /api/dashboard/boutiques/stats:
  *   get:
  *     summary: Statistiques globales des boutiques
  *     description: |
