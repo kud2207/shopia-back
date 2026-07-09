@@ -94,7 +94,7 @@
  *     summary: Créer un nouvel abonnement
  *     description: Crée un abonnement pour une boutique
  *     tags:
- *       - Abonnements
+ *       - Finances - Abonnements
  *     security:
  *       - bearerAuth: []
  *
