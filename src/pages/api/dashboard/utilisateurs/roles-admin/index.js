@@ -110,6 +110,7 @@ import { generatePassword, sendInvitationEmail } from 'src/@apiCore/lib/email'
 import AuditLog from 'src/@apiCore/models/auditLog'
 import { withAuth } from 'src/@apiCore/middlewares/authMiddleware'
 import { Types } from 'mongoose'
+import bcrypt from 'bcrypt' 
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).json({ body: 'OK' })
@@ -239,7 +240,8 @@ async function createAdmin(req, res, currentAdmin) {
 
   // Générer un mot de passe temporaire si non fourni
   const tempPassword = password || generatePassword(12)
-  const hashedPassword = await Admin.hashPassword(tempPassword)
+const salt = await bcrypt.genSalt(10)
+const hashedPassword = await bcrypt.hash(tempPassword, salt)
 
   // Décomposer le nom complet
   const nameParts = nom_complet.trim().split(' ')

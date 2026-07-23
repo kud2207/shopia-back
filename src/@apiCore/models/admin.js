@@ -17,7 +17,6 @@ const adminSchema = new Schema(
     email: {
       type: String,
       required: [true, 'L\'email est requis'],
-      unique: true,
       lowercase: true,
       trim: true
     },

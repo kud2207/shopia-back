@@ -100,6 +100,7 @@ import Plan from 'src/@apiCore/models/plan'
 import { generatePassword, sendWelcomeEmail } from 'src/@apiCore/lib/email'
 import { withAuth } from 'src/@apiCore/middlewares/authMiddleware'
 import { Types } from 'mongoose'
+import bcrypt from 'bcrypt'
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).json({ body: 'OK' })
@@ -142,16 +143,13 @@ async function getSubscribers(req, res) {
   } = req.query
 
   const now = new Date()
-
-  const baseFilter = {
-    plan: { $exists: true }
-  }
+  const baseFilter = {}
 
   if (search) {
     baseFilter.$or = [
       { name: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
-      { whatsapp: { $regex: search, $options: 'i' } }
+      { phone: { $regex: search, $options: 'i' } },
+      { companyEmail: { $regex: search, $options: 'i' } }
     ]
   }
 
@@ -168,7 +166,7 @@ async function getSubscribers(req, res) {
   if (statut) {
     if (statut === 'actif') {
       baseFilter.active = true
-      baseFilter.expire_date = { $gte: now }
+      if (statut === 'actif') baseFilter.expire_date = { $gte: now } // Optionnel selon ta logique
     } else if (statut === 'suspendu') {
       baseFilter.active = false
     } else if (statut === 'expire') {
@@ -176,25 +174,24 @@ async function getSubscribers(req, res) {
     }
   }
 
+  // ⭐ CORRECTION ICI : On utilise 'user' au lieu de 'owner', et 'userInfo' au lieu de 'ownerInfo'
   const shops = await Shop.aggregate([
     { $lookup: { from: 'plans', localField: 'plan', foreignField: '_id', as: 'planInfo' }},
     { $unwind: { path: '$planInfo', preserveNullAndEmptyArrays: true }},
-    { $lookup: { from: 'users', localField: 'owner', foreignField: '_id', as: 'ownerInfo' }},
-    { $unwind: { path: '$ownerInfo', preserveNullAndEmptyArrays: true }},
+    { $lookup: { from: 'users', localField: 'user', foreignField: '_id', as: 'userInfo' }}, // <-- CHANGEMENT
+    { $unwind: { path: '$userInfo', preserveNullAndEmptyArrays: true }},
     { $match: baseFilter },
     { $sort: { createdAt: -1 }},
     { $skip: (parseInt(page) - 1) * parseInt(limit) },
     { $limit: parseInt(limit) }
   ])
 
-  const totalShops = await Shop.aggregate([
-    { $lookup: { from: 'plans', localField: 'plan', foreignField: '_id', as: 'planInfo' }},
-    { $unwind: { path: '$planInfo', preserveNullAndEmptyArrays: true }},
+  const countResult = await Shop.aggregate([
     { $match: baseFilter },
     { $count: 'total' }
   ])
-
-  const total = totalShops[0]?.total || 0
+  
+  const total = countResult.length > 0 ? countResult[0].total : 0
 
   const formattedShops = shops.map(shop => {
     let statutLabel = 'Actif'
@@ -205,15 +202,20 @@ async function getSubscribers(req, res) {
     if (['delivery', 'livraison'].includes(shop.type)) profilLabel = 'Livreur'
     else if (['service', 'prestataire'].includes(shop.type)) profilLabel = 'Prestataire'
 
+    // ⭐ CORRECTION ICI : On utilise 'userInfo'
+    const user = shop.userInfo
+    // On essaie de composer le nom avec first_name + last_name, sinon on prend 'name'
+    const fullName = user ? ([user.first_name, user.last_name].filter(Boolean).join(' ') || user.name) : shop.name
+
     return {
-      id: shop.ownerInfo?._id || shop._id,
-      nom_complet: shop.ownerInfo?.name || shop.name || 'Non renseigné',
-      email: shop.email || shop.ownerInfo?.email || '',
-      whatsapp: shop.whatsapp || shop.ownerInfo?.phone || '',
+      id: shop._id,
+      nom_complet: fullName || 'Non renseigné',
+      email: user?.email || shop.companyEmail || '', // Fallback sur l'email de l'entreprise
+      whatsapp: user?.phone || shop.phone || '',     // Fallback sur le téléphone de l'entreprise
       profil: profilLabel,
       plan: shop.planInfo?.name || 'Gratuit',
       statut: statutLabel,
-      date_expiration: shop.expire_date?.toISOString().split('T')[0] || '-',
+      date_expiration: shop.expire_date ? shop.expire_date.toISOString().split('T')[0] : '-',
       derniere_activite: getTimeAgo(shop.updatedAt),
       nom_boutique: shop.name
     }
@@ -234,12 +236,13 @@ async function getSubscribers(req, res) {
   })
 }
 
+
 // POST - Créer un abonné
 async function createSubscriber(req, res, admin) {
   const { 
     nom_complet,
     email,
-    whatsapp,
+    phone: whatsapp,
     profil,
     plan_abonnement,
     nom_boutique,
@@ -262,7 +265,8 @@ async function createSubscriber(req, res, admin) {
   }
 
   const tempPassword = generatePassword(12)
-  const hashedPassword = await User.hashPassword(tempPassword)
+const salt = await bcrypt.genSalt(10)
+const hashedPassword = await bcrypt.hash(tempPassword, salt)
 
   let role = 'admin_support'
   if (profil === 'e-commerçant') role = 'admin_commercial'
@@ -289,12 +293,12 @@ async function createSubscriber(req, res, admin) {
   const shop = new Shop({
     name: nom_boutique,
     type: getShopType(profil),
-    owner: user._id,
+    user: user._id,
     plan: plan?._id,
     subscription_date: new Date(),
     expire_date: expirationDate,
     active: true,
-    notes
+    description: notes
   })
   await shop.save()
 

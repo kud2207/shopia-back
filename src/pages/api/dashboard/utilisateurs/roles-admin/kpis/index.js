@@ -3,14 +3,7 @@
  * /api/dashboard/utilisateurs/roles-admin/kpis:
  *   get:
  *     summary: KPIs des administrateurs par rôle
- *     description: |
- *       Retourne les indicateurs clés des administrateurs par type de rôle.
- *       
- *       **Métriques** :
- *       - Super Admin
- *       - Admin Support
- *       - Admin Financier
- *       - Admin Commercial
+ *     description: Retourne les indicateurs clés des administrateurs par type de rôle.
  *     tags:
  *       - Utilisateurs - Rôles admin
  *     security:
@@ -24,30 +17,35 @@
  *             schema:
  *               type: object
  *               properties:
- *                 super_admin:
- *                   type: integer
- *                   example: 2
- *                 super_admin_tendance:
- *                   type: number
- *                   example: 1
- *                 admin_support:
- *                   type: integer
- *                   example: 2
- *                 admin_support_tendance:
- *                   type: number
- *                   example: 0
- *                 admin_financier:
- *                   type: integer
- *                   example: 5
- *                 admin_financier_tendance:
- *                   type: number
- *                   example: 2
- *                 admin_commercial:
- *                   type: integer
- *                   example: 3
- *                 admin_commercial_tendance:
- *                   type: number
- *                   example: 0
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     super_admin:
+ *                       type: integer
+ *                       example: 2
+ *                     super_admin_tendance:
+ *                       type: number
+ *                       example: 1
+ *                     admin_support:
+ *                       type: integer
+ *                       example: 2
+ *                     admin_support_tendance:
+ *                       type: number
+ *                       example: 0
+ *                     admin_financier:
+ *                       type: integer
+ *                       example: 5
+ *                     admin_financier_tendance:
+ *                       type: number
+ *                       example: 2
+ *                     admin_commercial:
+ *                       type: integer
+ *                       example: 3
+ *                     admin_commercial_tendance:
+ *                       type: number
+ *                       example: 0
  */
 
 import dbConnect from 'src/@apiCore/lib/mongodb'
@@ -71,14 +69,10 @@ export default async function handler(req, res) {
 
     // 📊 Calculer les KPIs par rôle en parallèle
     const [
-      currentSuperAdmin,
-      previousSuperAdmin,
-      currentSupport,
-      previousSupport,
-      currentFinancier,
-      previousFinancier,
-      currentCommercial,
-      previousCommercial
+      currentSuperAdmin, previousSuperAdmin,
+      currentSupport, previousSupport,
+      currentFinancier, previousFinancier,
+      currentCommercial, previousCommercial
     ] = await Promise.all([
       // Super Admin
       Admin.countDocuments({ role: 'super_admin', active: true }),
