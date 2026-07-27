@@ -20,8 +20,9 @@
  *       200:
  *         description: Notification supprimée
  */
+
 import dbConnect from 'src/@apiCore/lib/mongodb'
-import Notification from 'src/@apiCore/models/notification'
+import Notification from 'src/@apiCore/models/notifications'
 import { withAuth } from 'src/@apiCore/middlewares/authMiddleware'
 
 export default async function handler(req, res) {

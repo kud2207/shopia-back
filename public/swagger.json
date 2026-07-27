@@ -1903,6 +1903,1066 @@
         }
       }
     },
+    "/api/dashboard/profil/moi": {
+      "get": {
+        "summary": "Récupérer mon profil",
+        "description": "Retourne les informations complètes de l'administrateur connecté.\n\n**Données incluses** :\n- Informations personnelles\n- Préférences d'affichage\n- Paramètres de sécurité\n",
+        "tags": [
+          "Profil Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profil récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "nom_complet": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "telephone": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "avatar_url": {
+                      "type": "string"
+                    },
+                    "pays": {
+                      "type": "string"
+                    },
+                    "ville": {
+                      "type": "string"
+                    },
+                    "date_creation": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "derniere_connexion": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "preferences": {
+                      "type": "object"
+                    },
+                    "securite": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Modifier mon profil",
+        "description": "Met à jour les informations personnelles de l'admin connecté.\n\n**Règles métier** :\n- Vérifie l'unicité de l'email\n- Envoie email de confirmation si email changé\n- Logger dans audit_log\n",
+        "tags": [
+          "Profil Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nom_complet": {
+                    "type": "string",
+                    "example": "Jean Dupont"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "jean.dupont@shopia.com"
+                  },
+                  "telephone": {
+                    "type": "string",
+                    "example": "+237 6 97 35 07 56"
+                  },
+                  "pays": {
+                    "type": "string",
+                    "example": "Cameroun"
+                  },
+                  "ville": {
+                    "type": "string",
+                    "example": "Yaoundé"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profil mis à jour avec succès"
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/preferences": {
+      "put": {
+        "summary": "Mettre à jour mes préférences",
+        "description": "Met à jour les préférences d'affichage et de notification de l'admin.\n",
+        "tags": [
+          "Profil Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "langue": {
+                    "type": "string",
+                    "enum": [
+                      "fr",
+                      "en"
+                    ],
+                    "example": "fr"
+                  },
+                  "format_date": {
+                    "type": "string",
+                    "enum": [
+                      "JJ/MM/AA",
+                      "MM/JJ/AA",
+                      "AA/MM/JJ"
+                    ],
+                    "example": "JJ/MM/AA"
+                  },
+                  "format_heure": {
+                    "type": "string",
+                    "enum": [
+                      "12h",
+                      "24h"
+                    ],
+                    "example": "24h"
+                  },
+                  "fuseau_horaire": {
+                    "type": "string",
+                    "example": "Afrique/Yaounde"
+                  },
+                  "notifications_email": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "notifications_push": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Préférences mises à jour avec succès"
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/export-activity": {
+      "post": {
+        "summary": "Exporter mon activité",
+        "description": "Génère un fichier CSV/PDF de l'historique d'activité de l'admin.\n",
+        "tags": [
+          "Profil Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "csv",
+                      "pdf"
+                    ],
+                    "default": "csv"
+                  },
+                  "date_debut": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "date_fin": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fichier généré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "description": "URL de téléchargement du fichier"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/changer-password": {
+      "post": {
+        "summary": "Changer mon mot de passe",
+        "description": "Permet à l'admin de changer son mot de passe.\n\n**Règles de validation** :\n- Minimum 8 caractères\n- Au moins 1 majuscule\n- Au moins 1 chiffre\n- Au moins 1 caractère spécial\n",
+        "tags": [
+          "Profil Admin - Sécurité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "password_actuel",
+                  "nouveau_password",
+                  "confirmation_password"
+                ],
+                "properties": {
+                  "password_actuel": {
+                    "type": "string",
+                    "example": "ancienMotDePasse123"
+                  },
+                  "nouveau_password": {
+                    "type": "string",
+                    "example": "nouveauMotDePasse456!"
+                  },
+                  "confirmation_password": {
+                    "type": "string",
+                    "example": "nouveauMotDePasse456!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mot de passe changé avec succès"
+          },
+          "400": {
+            "description": "Mot de passe invalide ou trop faible"
+          },
+          "401": {
+            "description": "Mot de passe actuel incorrect"
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/activity-log": {
+      "get": {
+        "summary": "Mon journal d'activité",
+        "description": "Retourne l'historique des actions effectuées par l'admin connecté.\n\n**Filtres disponibles** :\n- Uniquement les actions de l'admin connecté\n- Pagination disponible\n",
+        "tags": [
+          "Profil Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Journal d'activité récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "type_evenement": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "temps_ecoule": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/2fa/verifier": {
+      "post": {
+        "summary": "Vérifier le code 2FA",
+        "description": "Vérifie le code de vérification et active la 2FA si valide.\n",
+        "tags": [
+          "Profil Admin - Sécurité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "example": "123456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "2FA activée avec succès"
+          },
+          "400": {
+            "description": "Code invalide ou expiré"
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/2fa/statut": {
+      "get": {
+        "summary": "Statut de l'authentification à deux facteurs",
+        "description": "Retourne l'état actuel de la 2FA pour l'admin connecté.",
+        "tags": [
+          "Profil Admin - Sécurité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statut récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "2fa_active": {
+                          "type": "boolean"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "sms",
+                            "email",
+                            "authenticator"
+                          ]
+                        },
+                        "backup_codes_count": {
+                          "type": "integer"
+                        },
+                        "configured_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/2fa/desactiver": {
+      "post": {
+        "summary": "Désactiver l'authentification à deux facteurs",
+        "description": "Désactive la 2FA après vérification du mot de passe.\n",
+        "tags": [
+          "Profil Admin - Sécurité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "password"
+                ],
+                "properties": {
+                  "password": {
+                    "type": "string",
+                    "example": "monMotDePasseActuel"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "2FA désactivée avec succès"
+          },
+          "401": {
+            "description": "Mot de passe incorrect"
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/2fa/backup-codes": {
+      "post": {
+        "summary": "Générer de nouveaux codes de secours",
+        "description": "Génère de nouveaux codes de secours pour la 2FA.\nLes anciens codes sont invalidés.\n",
+        "tags": [
+          "Profil Admin - Sécurité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Codes de secours générés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "backup_codes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "example": [
+                            "ABC123",
+                            "DEF456",
+                            "GHI789"
+                          ]
+                        },
+                        "expires_at": {
+                          "type": "string",
+                          "format": "date",
+                          "description": "Les codes n'expirent pas mais doivent être stockés en sécurité"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/2fa/activer": {
+      "post": {
+        "summary": "Activer l'authentification à deux facteurs (2FA)",
+        "description": "Active la 2FA pour le compte de l'admin.\n\n**Méthodes disponibles** :\n- SMS : Code envoyé par SMS\n- Email : Code envoyé par email\n- authenticator : Application d'authentification (Google Authenticator, Authy)\n",
+        "tags": [
+          "Profil Admin - Sécurité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "method"
+                ],
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "sms",
+                      "email",
+                      "authenticator"
+                    ],
+                    "example": "authenticator"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "2FA activée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "secret": {
+                          "type": "string"
+                        },
+                        "qr_code_url": {
+                          "type": "string",
+                          "description": "URL du QR code pour scanner avec l'app"
+                        },
+                        "backup_codes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Méthode invalide"
+          }
+        }
+      }
+    },
+    "/api/dashboard/notifications": {
+      "get": {
+        "summary": "Liste des notifications",
+        "description": "Retourne la liste paginée des notifications avec filtres.\n\n**Filtres disponibles** :\n- `categorie` : toutes, commandes, alertes, finance, support\n- `statut` : toutes, non_lues, lues\n",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "categorie",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "toutes",
+                "commandes",
+                "alertes",
+                "finance",
+                "support"
+              ],
+              "default": "toutes"
+            }
+          },
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "toutes",
+                "non_lues",
+                "lues"
+              ],
+              "default": "toutes"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notifications récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "titre": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              },
+                              "categorie": {
+                                "type": "string"
+                              },
+                              "priorite": {
+                                "type": "string"
+                              },
+                              "est_lue": {
+                                "type": "boolean"
+                              },
+                              "date_creation": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "temps_ecoule": {
+                                "type": "string"
+                              },
+                              "metadata": {
+                                "type": "object"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object"
+                        },
+                        "non_lues_count": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/notifications/mark-all-read": {
+      "patch": {
+        "summary": "Marquer toutes les notifications comme lues",
+        "description": "Marque toutes les notifications de l'admin comme lues.",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Toutes les notifications marquées comme lues",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "marked_count": {
+                      "type": "integer",
+                      "description": "Nombre de notifications marquées"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/notifications/compteur": {
+      "get": {
+        "summary": "Compteur de notifications non lues",
+        "description": "Retourne le nombre total de notifications non lues et le détail par catégorie.",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compteur récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total_non_lues": {
+                      "type": "integer",
+                      "example": 3
+                    },
+                    "par_categorie": {
+                      "type": "object",
+                      "properties": {
+                        "commandes": {
+                          "type": "integer"
+                        },
+                        "alertes": {
+                          "type": "integer"
+                        },
+                        "finance": {
+                          "type": "integer"
+                        },
+                        "support": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/notifications/clear-all": {
+      "delete": {
+        "summary": "Supprimer toutes les notifications",
+        "description": "Supprime toutes les notifications (optionnel : filtrer par catégorie).\n",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "categorie": {
+                    "type": "string",
+                    "enum": [
+                      "toutes",
+                      "commandes",
+                      "alertes",
+                      "finance",
+                      "support"
+                    ],
+                    "default": "toutes"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notifications supprimées",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "deleted_count": {
+                      "type": "integer",
+                      "description": "Nombre de notifications supprimées"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/messages/conversations": {
+      "get": {
+        "summary": "Liste des conversations",
+        "description": "Retourne la liste paginée des conversations avec les abonnés.\n\n**Filtres disponibles** :\n- `search` : Recherche par nom d'abonné\n- `statut` : toutes ou non_lues uniquement\n",
+        "tags": [
+          "Messagerie"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche par nom d'abonné"
+          },
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "toutes",
+                "non_lues"
+              ],
+              "default": "toutes"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des conversations récupérée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "abonne": {
+                                "type": "object"
+                              },
+                              "dernier_message": {
+                                "type": "object"
+                              },
+                              "messages_non_lus_count": {
+                                "type": "integer"
+                              },
+                              "date_dernier_message": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object"
+                        },
+                        "total_non_lues": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/messages/compteur": {
+      "get": {
+        "summary": "Compteur de messages non lus",
+        "description": "Retourne le nombre total de conversations et messages non lus.",
+        "tags": [
+          "Messagerie"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compteur récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total_conversations_non_lues": {
+                      "type": "integer",
+                      "example": 5
+                    },
+                    "total_messages_non_lus": {
+                      "type": "integer",
+                      "example": 12
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/dashboard/finances/revenus-par-module": {
       "get": {
         "summary": "Revenus par module (graphique)",
