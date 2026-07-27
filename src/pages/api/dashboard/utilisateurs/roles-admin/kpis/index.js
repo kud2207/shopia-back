@@ -72,7 +72,8 @@ export default async function handler(req, res) {
       currentSuperAdmin, previousSuperAdmin,
       currentSupport, previousSupport,
       currentFinancier, previousFinancier,
-      currentCommercial, previousCommercial
+      currentCommercial, previousCommercial,
+      inactiveCount
     ] = await Promise.all([
       // Super Admin
       Admin.countDocuments({ role: 'super_admin', active: true }),
@@ -88,7 +89,10 @@ export default async function handler(req, res) {
       
       // Admin Commercial
       Admin.countDocuments({ role: 'admin_commercial', active: true }),
-      Admin.countDocuments({ role: 'admin_commercial', createdAt: { $gte: previousMonthStart } })
+      Admin.countDocuments({ role: 'admin_commercial', createdAt: { $gte: previousMonthStart } }),
+
+      // Admins inactifs
+      Admin.countDocuments({ active: false })
     ])
 
     // Calculer les tendances
@@ -108,7 +112,8 @@ export default async function handler(req, res) {
         admin_financier: currentFinancier,
         admin_financier_tendance: calculateTrend(currentFinancier, previousFinancier),
         admin_commercial: currentCommercial,
-        admin_commercial_tendance: calculateTrend(currentCommercial, previousCommercial)
+        admin_commercial_tendance: calculateTrend(currentCommercial, previousCommercial),
+        inactifs: inactiveCount
       }
     })
 
