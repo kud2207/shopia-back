@@ -85,8 +85,9 @@
  *                     non_lues_count:
  *                       type: integer
  */
+
 import dbConnect from 'src/@apiCore/lib/mongodb'
-import Notification from 'src/@apiCore/models/notification'
+import Notification from 'src/@apiCore/models/notifications'
 import { withAuth } from 'src/@apiCore/middlewares/authMiddleware'
 
 export default async function handler(req, res) {
@@ -103,6 +104,7 @@ export default async function handler(req, res) {
 
     const { categorie = 'toutes', statut = 'toutes', page = 1, limit = 20 } = req.query
 
+    // Construire les filtres
     const filter = {}
     
     if (categorie !== 'toutes') {
@@ -110,36 +112,36 @@ export default async function handler(req, res) {
     }
 
     if (statut === 'non_lues') {
-      filter.read = false
+      filter.readBy = { $ne: auth.admin._id }
     } else if (statut === 'lues') {
-      filter.read = true
+      filter.readBy = auth.admin._id
     }
 
+    // Récupérer les notifications
     const notifications = await Notification.find(filter)
       .sort({ createdAt: -1 })
       .skip((parseInt(page) - 1) * parseInt(limit))
       .limit(parseInt(limit))
 
+    // Compter le total de notifications non lues
     const nonLuesCount = await Notification.countDocuments({
-      ...(categorie !== 'toutes' ? { category: categorie } : {}),
-      read: false
+      category: categorie !== 'toutes' ? categorie : { $exists: true },
+      readBy: { $ne: auth.admin._id }
     })
 
     const total = await Notification.countDocuments(filter)
 
     const formattedNotifications = notifications.map(notif => ({
       id: notif._id,
-      type: notif.type || 'info',
+      type: notif.type,
       titre: notif.title,
-      message: notif.content,
-      categorie: notif.category || 'support',
-      priorite: notif.priority || 'info',
-      est_lue: notif.read || false,
+      message: notif.message,
+      categorie: notif.category,
+      priorite: notif.priority,
+      est_lue: notif.readBy?.some(id => id.toString() === auth.admin._id.toString()) || false,
       date_creation: notif.createdAt?.toISOString(),
       temps_ecoule: getTimeAgo(notif.createdAt),
-      metadata: notif.metadata || {},
-      redirectionLink: notif.redirectionLink,
-      redirectionLabel: notif.redirectionLabel
+      metadata: notif.metadata || {}
     }))
 
     return res.status(200).json({

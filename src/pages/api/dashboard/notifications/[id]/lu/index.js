@@ -20,8 +20,9 @@
  *       200:
  *         description: Notification marquée comme lue
  */
+
 import dbConnect from 'src/@apiCore/lib/mongodb'
-import Notification from 'src/@apiCore/models/notification'
+import Notification from 'src/@apiCore/models/notifications'
 import { withAuth } from 'src/@apiCore/middlewares/authMiddleware'
 
 export default async function handler(req, res) {
@@ -43,12 +44,12 @@ export default async function handler(req, res) {
       return res.status(404).json({ success: false, message: 'Notification non trouvée' })
     }
 
-    notification.read = true
-    if (!notification.readBy) notification.readBy = []
-    if (!notification.readBy.some(id => id.toString() === auth.admin._id.toString())) {
+    // Ajouter l'admin aux notifications lues
+    if (!notification.readBy?.some(id => id.toString() === auth.admin._id.toString())) {
+      notification.readBy = notification.readBy || []
       notification.readBy.push(auth.admin._id)
+      await notification.save()
     }
-    await notification.save()
 
     return res.status(200).json({
       success: true,
