@@ -11,6 +11,1043 @@
     }
   ],
   "paths": {
+    "/api/dashboard/utilisateurs/tickets/kpis": {
+      "get": {
+        "summary": "KPIs du support et des tickets",
+        "description": "Retourne les indicateurs clés du support technique en temps réel.\n\n**Métriques incluses** :\n- Nombre de tickets (ouverts, en cours, résolus, fermés) et leurs tendances\n- Temps de résolution moyen (en heures)\n- Comparaison avec l'objectif de 24h\n",
+        "tags": [
+          "Utilisateurs - Support & tickets"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KPIs récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "KPIs support récupérés avec succès"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "tickets_ouverts": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "tickets_ouverts_tendance": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "tickets_en_cours": {
+                          "type": "integer",
+                          "example": 3
+                        },
+                        "tickets_en_cours_tendance": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "tickets_resolus": {
+                          "type": "integer",
+                          "example": 4
+                        },
+                        "tickets_resolus_tendance": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "tickets_fermes": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "tickets_fermes_tendance": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "temps_resolution_moyen": {
+                          "type": "number",
+                          "description": "Temps moyen en heures",
+                          "example": 23
+                        },
+                        "objectif_resolution": {
+                          "type": "number",
+                          "example": 24
+                        },
+                        "performance_objectif_atteint": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "500": {
+            "description": "Erreur serveur"
+          }
+        }
+      }
+    },
+    "/api/dashboard/utilisateurs/tickets/admins-disponibles": {
+      "get": {
+        "summary": "Liste des admins disponibles pour assignation",
+        "description": "Retourne la liste des administrateurs pouvant recevoir des tickets.\n\n**Filtre** : Admin Support et Super Admin uniquement\n",
+        "tags": [
+          "Utilisateurs - Support & tickets"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des admins récupérée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "admins": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "nom_complet": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/utilisateurs/roles-admin": {
+      "get": {
+        "summary": "Liste des administrateurs",
+        "description": "Retourne la liste paginée des administrateurs avec filtres.\n\n**Filtres disponibles** :\n- `search` : Recherche par nom ou email\n- `role` : super_admin, admin_support, admin_financier, admin_commercial\n- `statut` : actif, desactive\n",
+        "tags": [
+          "Utilisateurs - Rôles admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche par nom ou email"
+          },
+          {
+            "in": "query",
+            "name": "role",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "super_admin",
+                "admin_support",
+                "admin_financier",
+                "admin_commercial"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "actif",
+                "desactive"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste récupérée avec succès"
+          }
+        }
+      },
+      "post": {
+        "summary": "Créer un nouvel administrateur",
+        "description": "Crée un administrateur avec email d'invitation.\nSeul un Super Admin peut créer d'autres admins.\n\n**Règles métier** :\n- Génère un mot de passe temporaire si non fourni\n- Envoie email d'invitation\n- Logger dans audit_log\n",
+        "tags": [
+          "Utilisateurs - Rôles admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nom_complet",
+                  "email",
+                  "role"
+                ],
+                "properties": {
+                  "nom_complet": {
+                    "type": "string",
+                    "example": "Jean Dupont"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "jean@shopia.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "MotDePasse123!"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "super_admin",
+                      "admin_support",
+                      "admin_financier",
+                      "admin_commercial"
+                    ],
+                    "example": "admin_support"
+                  },
+                  "permissions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "consultation_boutiques",
+                      "gestion_tickets",
+                      "messagerie"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Administrateur créé avec succès"
+          },
+          "403": {
+            "description": "Permissions insuffisantes"
+          }
+        }
+      }
+    },
+    "/api/dashboard/utilisateurs/roles-admin/roles-disponibles": {
+      "get": {
+        "summary": "Liste des rôles disponibles",
+        "description": "Retourne la liste des rôles avec leurs permissions par défaut",
+        "tags": [
+          "Utilisateurs - Rôles admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des rôles récupérée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "nom": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "permissions_defaut": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/utilisateurs/roles-admin/kpis": {
+      "get": {
+        "summary": "KPIs des administrateurs par rôle",
+        "description": "Retourne les indicateurs clés des administrateurs par type de rôle.",
+        "tags": [
+          "Utilisateurs - Rôles admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KPIs récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "super_admin": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "super_admin_tendance": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "admin_support": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "admin_support_tendance": {
+                          "type": "number",
+                          "example": 0
+                        },
+                        "admin_financier": {
+                          "type": "integer",
+                          "example": 5
+                        },
+                        "admin_financier_tendance": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "admin_commercial": {
+                          "type": "integer",
+                          "example": 3
+                        },
+                        "admin_commercial_tendance": {
+                          "type": "number",
+                          "example": 0
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/utilisateurs/collaborateurs": {
+      "get": {
+        "summary": "Liste des collaborateurs groupés par boutique",
+        "description": "Retourne la liste des collaborateurs regroupés par boutique avec expansion.\n\n**Filtres disponibles** :\n- `search` : Recherche par nom de boutique\n- `role` : vendeur, gestionnaire, admin\n",
+        "tags": [
+          "Utilisateurs - Collaborateurs"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche par nom de boutique"
+          },
+          {
+            "in": "query",
+            "name": "role",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "vendeur",
+                "gestionnaire",
+                "admin"
+              ]
+            },
+            "description": "Filtrer par rôle"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des collaborateurs récupérée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "boutique_id": {
+                                "type": "string"
+                              },
+                              "nom_boutique": {
+                                "type": "string"
+                              },
+                              "profil_boutique": {
+                                "type": "string"
+                              },
+                              "nombre_collaborateurs": {
+                                "type": "integer"
+                              },
+                              "collaborateurs": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "nom_complet": {
+                                      "type": "string"
+                                    },
+                                    "role": {
+                                      "type": "string"
+                                    },
+                                    "statut": {
+                                      "type": "string"
+                                    },
+                                    "date_creation": {
+                                      "type": "string",
+                                      "format": "date"
+                                    },
+                                    "derniere_activite": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "page": {
+                              "type": "integer"
+                            },
+                            "limit": {
+                              "type": "integer"
+                            },
+                            "total": {
+                              "type": "integer"
+                            },
+                            "total_pages": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/utilisateurs/collaborateurs/kpis": {
+      "get": {
+        "summary": "KPIs des collaborateurs",
+        "description": "Retourne les indicateurs clés des collaborateurs de la plateforme.\n\n**Métriques** :\n- Total collaborateurs\n- Collaborateurs actifs\n- Collaborateurs désactivés\n- Moyenne par boutique\n",
+        "tags": [
+          "Utilisateurs - Collaborateurs"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KPIs récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total_collaborateurs": {
+                      "type": "integer",
+                      "example": 38
+                    },
+                    "total_collaborateurs_tendance": {
+                      "type": "number",
+                      "example": 20
+                    },
+                    "collaborateurs_actifs": {
+                      "type": "integer",
+                      "example": 32
+                    },
+                    "collaborateurs_actifs_tendance": {
+                      "type": "number",
+                      "example": 5
+                    },
+                    "collaborateurs_desactives": {
+                      "type": "integer",
+                      "example": 10
+                    },
+                    "collaborateurs_desactives_tendance": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "moyenne_par_boutique": {
+                      "type": "number",
+                      "example": 10
+                    },
+                    "moyenne_par_boutique_tendance": {
+                      "type": "number",
+                      "example": 10
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/utilisateurs/audit-log": {
+      "get": {
+        "summary": "Journal d'audit des actions administrateurs",
+        "description": "Retourne la liste paginée de toutes les actions effectuées par les admins.\n\n**Filtres disponibles** :\n- `search` : Recherche par nom d'admin\n- `type_evenement` : tous, connexion, modification, abonnement, suspension, ticket\n- `admin_id` : ID de l'admin\n- `date_debut` et `date_fin` : Période personnalisée\n",
+        "tags": [
+          "Utilisateurs - Journal d'activité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche par nom d'admin"
+          },
+          {
+            "in": "query",
+            "name": "type_evenement",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tous",
+                "connexion",
+                "modification",
+                "abonnement",
+                "suspension",
+                "ticket"
+              ],
+              "default": "tous"
+            }
+          },
+          {
+            "in": "query",
+            "name": "admin_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID de l'admin"
+          },
+          {
+            "in": "query",
+            "name": "date_debut",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Date de début (YYYY-MM-DD)"
+          },
+          {
+            "in": "query",
+            "name": "date_fin",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Date de fin (YYYY-MM-DD)"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Journal d'audit récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "type_evenement": {
+                                "type": "string"
+                              },
+                              "titre": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "heure": {
+                                "type": "string"
+                              },
+                              "administrateur": {
+                                "type": "object"
+                              },
+                              "ip_address": {
+                                "type": "string"
+                              },
+                              "details": {
+                                "type": "object"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/utilisateurs/audit-log/kpis": {
+      "get": {
+        "summary": "KPIs du journal d'audit",
+        "description": "Retourne les indicateurs clés des actions administrateurs.\n\n**Métriques** :\n- Connexions\n- Modifications\n- Abonnements\n- Suspensions\n- Tickets résolus\n",
+        "tags": [
+          "Utilisateurs - Journal d'activité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KPIs récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "connexions": {
+                      "type": "integer",
+                      "example": 4
+                    },
+                    "connexions_tendance": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "modifications": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "modifications_tendance": {
+                      "type": "number",
+                      "example": 2
+                    },
+                    "abonnements": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "abonnements_tendance": {
+                      "type": "number",
+                      "example": 2
+                    },
+                    "suspensions": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "suspensions_tendance": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "tickets_resolus": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "tickets_resolus_tendance": {
+                      "type": "number",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/utilisateurs/abonnes": {
+      "get": {
+        "summary": "Liste des abonnés avec filtres",
+        "description": "Retourne la liste paginée des abonnés avec filtres avancés",
+        "tags": [
+          "Utilisateurs - Abonnés"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "profil",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "e-commerçant",
+                "livreur",
+                "prestataire"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "actif",
+                "suspendu",
+                "expire"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "plan",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "starter",
+                "premium",
+                "entreprise"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste récupérée avec succès"
+          }
+        }
+      },
+      "post": {
+        "summary": "Créer un nouveau compte abonné",
+        "description": "Crée un compte abonné avec boutique associée.\nGénère un mot de passe temporaire et envoie un email de bienvenue.\n",
+        "tags": [
+          "Utilisateurs"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nom_complet",
+                  "email",
+                  "whatsapp",
+                  "profil",
+                  "plan_abonnement",
+                  "nom_boutique"
+                ],
+                "properties": {
+                  "nom_complet": {
+                    "type": "string",
+                    "example": "Amina Mbarga"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "amina@gmail.com"
+                  },
+                  "whatsapp": {
+                    "type": "string",
+                    "example": "+237 6xxxxxxxx"
+                  },
+                  "profil": {
+                    "type": "string",
+                    "enum": [
+                      "e-commerçant",
+                      "livreur",
+                      "prestataire"
+                    ],
+                    "example": "e-commerçant"
+                  },
+                  "plan_abonnement": {
+                    "type": "string",
+                    "enum": [
+                      "starter",
+                      "premium",
+                      "entreprise"
+                    ],
+                    "example": "starter"
+                  },
+                  "nom_boutique": {
+                    "type": "string",
+                    "example": "Techno Kmer"
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Compte créé avec succès"
+          }
+        }
+      }
+    },
+    "/api/dashboard/utilisateurs/abonnes/kpis": {
+      "get": {
+        "summary": "KPIs des utilisateurs abonnés",
+        "description": "Retourne les indicateurs clés du module Utilisateurs.\n\n**Métriques** :\n- Abonnés actifs\n- Nouvelles inscriptions\n- Abonnements expirés\n- Comptes suspendus\n- E-commerçants\n- Livreurs & Prestataires\n",
+        "tags": [
+          "Utilisateurs - Abonnés"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KPIs récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "abonnes_actifs": {
+                      "type": "integer",
+                      "example": 142
+                    },
+                    "abonnes_actifs_tendance": {
+                      "type": "number",
+                      "example": 20
+                    },
+                    "nouvelles_inscriptions": {
+                      "type": "integer",
+                      "example": 8
+                    },
+                    "nouvelles_inscriptions_tendance": {
+                      "type": "number",
+                      "example": 5
+                    },
+                    "abonnements_expires": {
+                      "type": "integer",
+                      "example": 10
+                    },
+                    "abonnements_expires_tendance": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "comptes_suspendus": {
+                      "type": "integer",
+                      "example": 5
+                    },
+                    "comptes_suspendus_tendance": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "e_commercants": {
+                      "type": "integer",
+                      "example": 10
+                    },
+                    "e_commercants_tendance": {
+                      "type": "number",
+                      "example": 5
+                    },
+                    "livreurs_prestataires": {
+                      "type": "integer",
+                      "example": 30
+                    },
+                    "livreurs_prestataires_tendance": {
+                      "type": "number",
+                      "example": 8
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/dashboard/stats-dashboard/kpis": {
       "get": {
         "summary": "Récupérer les KPIs du dashboard",
@@ -866,7 +1903,2260 @@
         }
       }
     },
-    "/api/boutiques/stats": {
+    "/api/dashboard/profil/moi": {
+      "get": {
+        "summary": "Récupérer mon profil",
+        "description": "Retourne les informations complètes de l'administrateur connecté.\n\n**Données incluses** :\n- Informations personnelles\n- Préférences d'affichage\n- Paramètres de sécurité\n",
+        "tags": [
+          "Profil Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profil récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "nom_complet": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "telephone": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "avatar_url": {
+                      "type": "string"
+                    },
+                    "pays": {
+                      "type": "string"
+                    },
+                    "ville": {
+                      "type": "string"
+                    },
+                    "date_creation": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "derniere_connexion": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "preferences": {
+                      "type": "object"
+                    },
+                    "securite": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Modifier mon profil",
+        "description": "Met à jour les informations personnelles de l'admin connecté.\n\n**Règles métier** :\n- Vérifie l'unicité de l'email\n- Envoie email de confirmation si email changé\n- Logger dans audit_log\n",
+        "tags": [
+          "Profil Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nom_complet": {
+                    "type": "string",
+                    "example": "Jean Dupont"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "jean.dupont@shopia.com"
+                  },
+                  "telephone": {
+                    "type": "string",
+                    "example": "+237 6 97 35 07 56"
+                  },
+                  "pays": {
+                    "type": "string",
+                    "example": "Cameroun"
+                  },
+                  "ville": {
+                    "type": "string",
+                    "example": "Yaoundé"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profil mis à jour avec succès"
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/preferences": {
+      "put": {
+        "summary": "Mettre à jour mes préférences",
+        "description": "Met à jour les préférences d'affichage et de notification de l'admin.\n",
+        "tags": [
+          "Profil Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "langue": {
+                    "type": "string",
+                    "enum": [
+                      "fr",
+                      "en"
+                    ],
+                    "example": "fr"
+                  },
+                  "format_date": {
+                    "type": "string",
+                    "enum": [
+                      "JJ/MM/AA",
+                      "MM/JJ/AA",
+                      "AA/MM/JJ"
+                    ],
+                    "example": "JJ/MM/AA"
+                  },
+                  "format_heure": {
+                    "type": "string",
+                    "enum": [
+                      "12h",
+                      "24h"
+                    ],
+                    "example": "24h"
+                  },
+                  "fuseau_horaire": {
+                    "type": "string",
+                    "example": "Afrique/Yaounde"
+                  },
+                  "notifications_email": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "notifications_push": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Préférences mises à jour avec succès"
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/export-activity": {
+      "post": {
+        "summary": "Exporter mon activité",
+        "description": "Génère un fichier CSV/PDF de l'historique d'activité de l'admin.\n",
+        "tags": [
+          "Profil Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "csv",
+                      "pdf"
+                    ],
+                    "default": "csv"
+                  },
+                  "date_debut": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "date_fin": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fichier généré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "description": "URL de téléchargement du fichier"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/changer-password": {
+      "post": {
+        "summary": "Changer mon mot de passe",
+        "description": "Permet à l'admin de changer son mot de passe.\n\n**Règles de validation** :\n- Minimum 8 caractères\n- Au moins 1 majuscule\n- Au moins 1 chiffre\n- Au moins 1 caractère spécial\n",
+        "tags": [
+          "Profil Admin - Sécurité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "password_actuel",
+                  "nouveau_password",
+                  "confirmation_password"
+                ],
+                "properties": {
+                  "password_actuel": {
+                    "type": "string",
+                    "example": "ancienMotDePasse123"
+                  },
+                  "nouveau_password": {
+                    "type": "string",
+                    "example": "nouveauMotDePasse456!"
+                  },
+                  "confirmation_password": {
+                    "type": "string",
+                    "example": "nouveauMotDePasse456!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mot de passe changé avec succès"
+          },
+          "400": {
+            "description": "Mot de passe invalide ou trop faible"
+          },
+          "401": {
+            "description": "Mot de passe actuel incorrect"
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/activity-log": {
+      "get": {
+        "summary": "Mon journal d'activité",
+        "description": "Retourne l'historique des actions effectuées par l'admin connecté.\n\n**Filtres disponibles** :\n- Uniquement les actions de l'admin connecté\n- Pagination disponible\n",
+        "tags": [
+          "Profil Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Journal d'activité récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "type_evenement": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "temps_ecoule": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/2fa/verifier": {
+      "post": {
+        "summary": "Vérifier le code 2FA",
+        "description": "Vérifie le code de vérification et active la 2FA si valide.\n",
+        "tags": [
+          "Profil Admin - Sécurité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "example": "123456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "2FA activée avec succès"
+          },
+          "400": {
+            "description": "Code invalide ou expiré"
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/2fa/statut": {
+      "get": {
+        "summary": "Statut de l'authentification à deux facteurs",
+        "description": "Retourne l'état actuel de la 2FA pour l'admin connecté.",
+        "tags": [
+          "Profil Admin - Sécurité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statut récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "2fa_active": {
+                          "type": "boolean"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "sms",
+                            "email",
+                            "authenticator"
+                          ]
+                        },
+                        "backup_codes_count": {
+                          "type": "integer"
+                        },
+                        "configured_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/2fa/desactiver": {
+      "post": {
+        "summary": "Désactiver l'authentification à deux facteurs",
+        "description": "Désactive la 2FA après vérification du mot de passe.\n",
+        "tags": [
+          "Profil Admin - Sécurité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "password"
+                ],
+                "properties": {
+                  "password": {
+                    "type": "string",
+                    "example": "monMotDePasseActuel"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "2FA désactivée avec succès"
+          },
+          "401": {
+            "description": "Mot de passe incorrect"
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/2fa/backup-codes": {
+      "post": {
+        "summary": "Générer de nouveaux codes de secours",
+        "description": "Génère de nouveaux codes de secours pour la 2FA.\nLes anciens codes sont invalidés.\n",
+        "tags": [
+          "Profil Admin - Sécurité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Codes de secours générés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "backup_codes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "example": [
+                            "ABC123",
+                            "DEF456",
+                            "GHI789"
+                          ]
+                        },
+                        "expires_at": {
+                          "type": "string",
+                          "format": "date",
+                          "description": "Les codes n'expirent pas mais doivent être stockés en sécurité"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/profil/moi/2fa/activer": {
+      "post": {
+        "summary": "Activer l'authentification à deux facteurs (2FA)",
+        "description": "Active la 2FA pour le compte de l'admin.\n\n**Méthodes disponibles** :\n- SMS : Code envoyé par SMS\n- Email : Code envoyé par email\n- authenticator : Application d'authentification (Google Authenticator, Authy)\n",
+        "tags": [
+          "Profil Admin - Sécurité"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "method"
+                ],
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "sms",
+                      "email",
+                      "authenticator"
+                    ],
+                    "example": "authenticator"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "2FA activée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "secret": {
+                          "type": "string"
+                        },
+                        "qr_code_url": {
+                          "type": "string",
+                          "description": "URL du QR code pour scanner avec l'app"
+                        },
+                        "backup_codes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Méthode invalide"
+          }
+        }
+      }
+    },
+    "/api/dashboard/notifications": {
+      "get": {
+        "summary": "Liste des notifications",
+        "description": "Retourne la liste paginée des notifications avec filtres.\n\n**Filtres disponibles** :\n- `categorie` : toutes, commandes, alertes, finance, support\n- `statut` : toutes, non_lues, lues\n",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "categorie",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "toutes",
+                "commandes",
+                "alertes",
+                "finance",
+                "support"
+              ],
+              "default": "toutes"
+            }
+          },
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "toutes",
+                "non_lues",
+                "lues"
+              ],
+              "default": "toutes"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notifications récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "titre": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              },
+                              "categorie": {
+                                "type": "string"
+                              },
+                              "priorite": {
+                                "type": "string"
+                              },
+                              "est_lue": {
+                                "type": "boolean"
+                              },
+                              "date_creation": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "temps_ecoule": {
+                                "type": "string"
+                              },
+                              "metadata": {
+                                "type": "object"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object"
+                        },
+                        "non_lues_count": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/notifications/mark-all-read": {
+      "patch": {
+        "summary": "Marquer toutes les notifications comme lues",
+        "description": "Marque toutes les notifications de l'admin comme lues.",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Toutes les notifications marquées comme lues",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "marked_count": {
+                      "type": "integer",
+                      "description": "Nombre de notifications marquées"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/notifications/compteur": {
+      "get": {
+        "summary": "Compteur de notifications non lues",
+        "description": "Retourne le nombre total de notifications non lues et le détail par catégorie.",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compteur récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total_non_lues": {
+                      "type": "integer",
+                      "example": 3
+                    },
+                    "par_categorie": {
+                      "type": "object",
+                      "properties": {
+                        "commandes": {
+                          "type": "integer"
+                        },
+                        "alertes": {
+                          "type": "integer"
+                        },
+                        "finance": {
+                          "type": "integer"
+                        },
+                        "support": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/notifications/clear-all": {
+      "delete": {
+        "summary": "Supprimer toutes les notifications",
+        "description": "Supprime toutes les notifications (optionnel : filtrer par catégorie).\n",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "categorie": {
+                    "type": "string",
+                    "enum": [
+                      "toutes",
+                      "commandes",
+                      "alertes",
+                      "finance",
+                      "support"
+                    ],
+                    "default": "toutes"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notifications supprimées",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "deleted_count": {
+                      "type": "integer",
+                      "description": "Nombre de notifications supprimées"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/messages/conversations": {
+      "get": {
+        "summary": "Liste des conversations",
+        "description": "Retourne la liste paginée des conversations avec les abonnés.\n\n**Filtres disponibles** :\n- `search` : Recherche par nom d'abonné\n- `statut` : toutes ou non_lues uniquement\n",
+        "tags": [
+          "Messagerie"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche par nom d'abonné"
+          },
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "toutes",
+                "non_lues"
+              ],
+              "default": "toutes"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des conversations récupérée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "abonne": {
+                                "type": "object"
+                              },
+                              "dernier_message": {
+                                "type": "object"
+                              },
+                              "messages_non_lus_count": {
+                                "type": "integer"
+                              },
+                              "date_dernier_message": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object"
+                        },
+                        "total_non_lues": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/messages/compteur": {
+      "get": {
+        "summary": "Compteur de messages non lus",
+        "description": "Retourne le nombre total de conversations et messages non lus.",
+        "tags": [
+          "Messagerie"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compteur récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total_conversations_non_lues": {
+                      "type": "integer",
+                      "example": 5
+                    },
+                    "total_messages_non_lus": {
+                      "type": "integer",
+                      "example": 12
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/finances/revenus-par-module": {
+      "get": {
+        "summary": "Revenus par module (graphique)",
+        "description": "Retourne les séries temporelles des revenus par type de boutique.\n\n**Périodes disponibles** :\n- `3j` : 3 derniers jours\n- `2w` : 2 dernières semaines\n- `2mois` : 2 derniers mois\n- `3mois` : 3 derniers mois\n- `4mois` : 4 derniers mois (défaut)\n- `6mois` : 6 derniers mois\n",
+        "tags": [
+          "Finances"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "3j",
+                "2w",
+                "2mois",
+                "3mois",
+                "4mois",
+                "6mois"
+              ],
+              "default": "4mois"
+            },
+            "description": "Période à afficher"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Données récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "mois": {
+                            "type": "string"
+                          },
+                          "marchands": {
+                            "type": "number"
+                          },
+                          "livraison": {
+                            "type": "number"
+                          },
+                          "prestataires": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/finances/revenus-depenses": {
+      "get": {
+        "summary": "Revenus vs Dépenses (graphique)",
+        "description": "Retourne les séries temporelles comparant revenus et dépenses.\n\n**Périodes disponibles** :\n- `3j` : 3 derniers jours\n- `2w` : 2 dernières semaines\n- `2mois` : 2 derniers mois\n- `3mois` : 3 derniers mois\n- `4mois` : 4 derniers mois (défaut)\n- `6mois` : 6 derniers mois\n",
+        "tags": [
+          "Finances"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "3j",
+                "2w",
+                "2mois",
+                "3mois",
+                "4mois",
+                "6mois"
+              ],
+              "default": "4mois"
+            },
+            "description": "Période à afficher"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Données récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "mois": {
+                            "type": "string"
+                          },
+                          "revenus": {
+                            "type": "number"
+                          },
+                          "depenses": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/finances/rapports/services-livraison": {
+      "get": {
+        "summary": "Rapport services de livraison",
+        "description": "Retourne les performances financières des entreprises de livraison.\n\n**Métriques par service** :\n- Commandes assignées\n- Montants collectés\n- Commissions enregistrées\n- Montant reversé aux marchands\n- Dépenses\n",
+        "tags": [
+          "Finances - Rapports Financiers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "day",
+                "month",
+                "quarter",
+                "year"
+              ],
+              "default": "month"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rapport services livraison récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "service_livraison": {
+                                "type": "string"
+                              },
+                              "commandes_assignees": {
+                                "type": "number"
+                              },
+                              "montant_collectes": {
+                                "type": "number"
+                              },
+                              "commissions_enregistrees": {
+                                "type": "number"
+                              },
+                              "montant_reverse_marchands": {
+                                "type": "number"
+                              },
+                              "depenses": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/finances/rapports/global": {
+      "get": {
+        "summary": "Rapport global plateforme",
+        "description": "Retourne les KPIs financiers globaux et la liste des transactions.\n\n**KPIs** :\n- Commandes totales\n- Chiffre d'affaires\n- Commissions\n- Dépenses\n",
+        "tags": [
+          "Finances - Rapports Financiers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "day",
+                "month",
+                "quarter",
+                "custom"
+              ],
+              "default": "month"
+            },
+            "description": "Période du rapport"
+          },
+          {
+            "in": "query",
+            "name": "date_debut",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Date de début (si period=custom)"
+          },
+          {
+            "in": "query",
+            "name": "date_fin",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Date de fin (si period=custom)"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rapport global récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "kpis": {
+                      "type": "object",
+                      "properties": {
+                        "commandes_totales": {
+                          "type": "integer"
+                        },
+                        "commandes_totales_tendance": {
+                          "type": "number"
+                        },
+                        "chiffre_affaire": {
+                          "type": "number"
+                        },
+                        "chiffre_affaire_tendance": {
+                          "type": "number"
+                        },
+                        "commissions": {
+                          "type": "number"
+                        },
+                        "commissions_tendance": {
+                          "type": "number"
+                        },
+                        "depenses": {
+                          "type": "number"
+                        },
+                        "depenses_tendance": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "transactions": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "vente",
+                                  "commission",
+                                  "depense"
+                                ]
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "montant": {
+                                "type": "number"
+                              },
+                              "statut": {
+                                "type": "string",
+                                "enum": [
+                                  "valide",
+                                  "en_attente",
+                                  "debite"
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/finances/rapports/boutiques-marchands": {
+      "get": {
+        "summary": "Rapport boutiques marchands",
+        "description": "Retourne les performances financières détaillées par boutique marchand.\n\n**Métriques par boutique** :\n- Ventes totales\n- Livraisons réussies\n- Frais de livraison\n- Revenu net marchand\n",
+        "tags": [
+          "Finances - Rapports Financiers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche par nom de boutique"
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "day",
+                "month",
+                "quarter",
+                "year"
+              ],
+              "default": "month"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rapport boutiques récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "boutique": {
+                                "type": "string"
+                              },
+                              "ventes_totales": {
+                                "type": "number"
+                              },
+                              "livraisons_reussies": {
+                                "type": "integer"
+                              },
+                              "livraisons_totales": {
+                                "type": "integer"
+                              },
+                              "taux_livraison": {
+                                "type": "number"
+                              },
+                              "frais_livraison": {
+                                "type": "string"
+                              },
+                              "revenu_net_marchand": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/finances/rapports/abonnements": {
+      "get": {
+        "summary": "Rapport abonnements",
+        "description": "Retourne les KPIs et la liste détaillée des abonnements.\n\n**KPIs** :\n- Revenus des abonnements\n- Taux de renouvellement\n- Formules premium actives\n",
+        "tags": [
+          "Finances - Rapports Financiers"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "day",
+                "month",
+                "quarter",
+                "year"
+              ],
+              "default": "month"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rapport abonnements récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "kpis": {
+                      "type": "object",
+                      "properties": {
+                        "revenus_abonnements": {
+                          "type": "number"
+                        },
+                        "revenus_abonnements_tendance": {
+                          "type": "number"
+                        },
+                        "taux_renouvellement": {
+                          "type": "number"
+                        },
+                        "taux_renouvellement_tendance": {
+                          "type": "number"
+                        },
+                        "formule_premium_active": {
+                          "type": "integer"
+                        },
+                        "formule_premium_active_tendance": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "abonnements": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "abonne": {
+                                "type": "string"
+                              },
+                              "formule": {
+                                "type": "string",
+                                "enum": [
+                                  "starter",
+                                  "premium",
+                                  "entreprise"
+                                ]
+                              },
+                              "montant_paye": {
+                                "type": "number"
+                              },
+                              "date_encaissement": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "mode_reglement": {
+                                "type": "string",
+                                "enum": [
+                                  "carte_bancaire",
+                                  "mobile_money",
+                                  "virement"
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/finances/kpis": {
+      "get": {
+        "summary": "KPIs financiers globaux",
+        "description": "Retourne les 8 indicateurs financiers clés avec leurs tendances.\n\n**Métriques** :\n- Chiffre d'affaires global\n- Frais de livraison\n- Frais de commissions\n- Montant à reverser\n- Déjà reversé\n- Dépenses totales\n- Revenus des abonnements\n- Revenu net global\n",
+        "tags": [
+          "Finances"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "month",
+                "quarter",
+                "year"
+              ],
+              "default": "month"
+            },
+            "description": "Période de calcul"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KPIs récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ca_global": {
+                      "type": "number",
+                      "example": 850000
+                    },
+                    "ca_global_tendance": {
+                      "type": "number",
+                      "example": 18.6
+                    },
+                    "frais_livraison": {
+                      "type": "number",
+                      "example": 90000
+                    },
+                    "frais_livraison_tendance": {
+                      "type": "number",
+                      "example": 20
+                    },
+                    "frais_commissions": {
+                      "type": "number",
+                      "example": 50000
+                    },
+                    "frais_commissions_tendance": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "a_reverser": {
+                      "type": "number",
+                      "example": 25000
+                    },
+                    "a_reverser_tendance": {
+                      "type": "number",
+                      "example": 5
+                    },
+                    "deja_reverse": {
+                      "type": "number",
+                      "example": 25000
+                    },
+                    "deja_reverse_tendance": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "depenses_totales": {
+                      "type": "number",
+                      "example": 150000
+                    },
+                    "depenses_totales_tendance": {
+                      "type": "number",
+                      "example": -17.65
+                    },
+                    "revenus_abonnes": {
+                      "type": "number",
+                      "example": 150000
+                    },
+                    "revenus_abonnes_tendance": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "revenus_net_global": {
+                      "type": "number",
+                      "example": 750000
+                    },
+                    "revenus_net_global_tendance": {
+                      "type": "number",
+                      "example": 5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/finances/alertes": {
+      "get": {
+        "summary": "Alertes financières prioritaires",
+        "description": "Retourne les alertes financières critiques nécessitant une action.\n\n**Types d'alertes** :\n- Transactions bloquées (paiement en attente > 48h)\n- Abonnements expirés ou expirant bientôt\n- Reversements en retard\n",
+        "tags": [
+          "Finances"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alertes récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions_bloquees": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "example": 3
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "Paiement en attente depuis plus de 48h"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "montant": {
+                                "type": "number"
+                              },
+                              "boutique": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string",
+                                "format": "date"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "abonnements_expires": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "Abonnements expirés dans 3 jours - Relances non envoyées"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "boutique": {
+                                "type": "string"
+                              },
+                              "date_expiration": {
+                                "type": "string",
+                                "format": "date"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "reversements_en_retard": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "example": 3
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "Marchand boutique Alpha"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "boutique": {
+                                "type": "string"
+                              },
+                              "montant_du": {
+                                "type": "number"
+                              },
+                              "date_echeance": {
+                                "type": "string",
+                                "format": "date"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/finances/abonnements": {
+      "get": {
+        "summary": "Liste des abonnements",
+        "description": "Retourne la liste paginée des abonnements avec filtres.\n\n**Filtres disponibles** :\n- `statut` : actif, expire, desactiver\n- `formule` : starter, premium, entreprise\n- `search` : Recherche par nom de boutique\n",
+        "tags": [
+          "Finances - Abonnements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche par nom de boutique"
+          },
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "actif",
+                "expire",
+                "desactiver"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "formule",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "starter",
+                "premium",
+                "entreprise"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "month",
+                "quarter",
+                "year"
+              ],
+              "default": "month"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Abonnements récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "abonne": {
+                                "type": "string"
+                              },
+                              "profil": {
+                                "type": "string"
+                              },
+                              "formule": {
+                                "type": "string"
+                              },
+                              "date_debut": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "date_expiration": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "statut": {
+                                "type": "string"
+                              },
+                              "montant_mois": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Créer un nouvel abonnement",
+        "description": "Crée un abonnement pour une boutique",
+        "tags": [
+          "Finances - Abonnements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "abonne_id",
+                  "formule",
+                  "periode",
+                  "date_debut",
+                  "mode_paiement"
+                ],
+                "properties": {
+                  "abonne_id": {
+                    "type": "string",
+                    "example": "64fd1234567890abcdef12345"
+                  },
+                  "formule": {
+                    "type": "string",
+                    "enum": [
+                      "starter",
+                      "premium",
+                      "entreprise"
+                    ],
+                    "example": "starter"
+                  },
+                  "periode": {
+                    "type": "string",
+                    "enum": [
+                      "mensuelle",
+                      "trimestrielle",
+                      "annuelle"
+                    ],
+                    "example": "trimestrielle"
+                  },
+                  "date_debut": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2026-01-15"
+                  },
+                  "mode_paiement": {
+                    "type": "string",
+                    "enum": [
+                      "carte_bancaire",
+                      "mobile_money",
+                      "virement"
+                    ],
+                    "example": "carte_bancaire"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "example": "Abonnement créé manuellement"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Abonnement créé avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "abonne": {
+                          "type": "string"
+                        },
+                        "formule": {
+                          "type": "string"
+                        },
+                        "date_debut": {
+                          "type": "string"
+                        },
+                        "date_expiration": {
+                          "type": "string"
+                        },
+                        "statut": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/finances/abonnements/kpis": {
+      "get": {
+        "summary": "KPIs des abonnements",
+        "description": "Retourne les 4 indicateurs clés des abonnements avec tendances.\n\n**Métriques** :\n- Abonnements actifs\n- Abonnements expirés\n- Expirant bientôt (dans 3 jours)\n- Taux de renouvellement\n",
+        "tags": [
+          "Finances - Abonnements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "month",
+                "quarter",
+                "year"
+              ],
+              "default": "month"
+            },
+            "description": "Période de calcul"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KPIs récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "abonnements_actifs": {
+                      "type": "integer",
+                      "example": 150
+                    },
+                    "abonnements_actifs_tendance": {
+                      "type": "number",
+                      "example": 50
+                    },
+                    "abonnements_expires": {
+                      "type": "integer",
+                      "example": 20
+                    },
+                    "abonnements_expires_tendance": {
+                      "type": "number",
+                      "example": 5
+                    },
+                    "expirent_bientot": {
+                      "type": "integer",
+                      "example": 30
+                    },
+                    "expirent_bientot_tendance": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "taux_renouvellement": {
+                      "type": "number",
+                      "example": 60
+                    },
+                    "taux_renouvellement_tendance": {
+                      "type": "number",
+                      "example": 5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/boutiques/stats": {
       "get": {
         "summary": "Statistiques globales des boutiques",
         "description": "Retourne les 4 KPIs principaux du module Boutiques avec leurs tendances mensuelles.\n\n**KPIs retournés** :\n- Total des boutiques (tous types confondus)\n- E-commerçants (type: \"product\", \"marchand\", \"ecommerce\")\n- Services de livraison (type: \"delivery\", \"livraison\")\n- Prestataires (type: \"service\", \"prestataire\")\n\n**Période de calcul** : Mois en cours vs Mois précédent\n",
@@ -964,7 +4254,7 @@
         "summary": "Statuts des bots par boutique",
         "description": "Liste toutes les boutiques avec le statut de leur bot ShopBot",
         "tags": [
-          "ShopBot"
+          "Boutiques - ShopBot"
         ],
         "security": [
           {
@@ -1020,7 +4310,7 @@
         "summary": "Statistiques globales ShopBot",
         "description": "Retourne les KPIs globaux de l'assistant IA ShopBot.\n\n**Métriques** :\n- Statut global (actif/inactif/erreur)\n- Nombre d'interactions\n- Commandes générées\n- Taux de conversion\n",
         "tags": [
-          "ShopBot"
+          "Boutiques - ShopBot"
         ],
         "security": [
           {
@@ -1113,7 +4403,7 @@
         "summary": "Campagnes WhatsApp actives",
         "description": "Liste les campagnes WhatsApp en cours et planifiées",
         "tags": [
-          "ShopBot"
+          "Boutiques - ShopBot"
         ],
         "security": [
           {
@@ -1489,7 +4779,7 @@
         "summary": "Statistiques globales des prestataires de service",
         "description": "Retourne les KPIs agrégés pour le suivi des prestataires de service.\n\n**Métriques** :\n- Prestataires actifs\n- RDV actifs\n- Réservations\n- Taux d'occupation\n",
         "tags": [
-          "Prestataires"
+          "Boutiques - Prestataires"
         ],
         "security": [
           {
@@ -1573,7 +4863,7 @@
         "summary": "Liste des prestataires de service",
         "description": "Tableau de suivi détaillé par prestataire avec toutes les métriques",
         "tags": [
-          "Prestataires"
+          "Boutiques - Prestataires"
         ],
         "security": [
           {
@@ -1704,7 +4994,7 @@
         "summary": "Campagnes WhatsApp des prestataires",
         "description": "Liste les campagnes WhatsApp actives et terminées des prestataires",
         "tags": [
-          "Prestataires"
+          "Boutiques - Prestataires"
         ],
         "security": [
           {
@@ -1814,7 +5104,7 @@
         "summary": "Statistiques globales des services de livraison",
         "description": "Retourne les KPIs agrégés pour le suivi des entreprises de livraison.\n\n**Métriques** :\n- Partenaires actifs\n- Commandes du mois\n- Montant collecté\n- Taux de livraison\n",
         "tags": [
-          "Livraison"
+          "Boutiques - Livraison"
         ],
         "security": [
           {
@@ -1898,7 +5188,7 @@
         "summary": "Incidents de livraison - Commandes non livrées",
         "description": "Liste des commandes non livrées avec les motifs",
         "tags": [
-          "Livraison"
+          "Boutiques - Livraison"
         ],
         "security": [
           {
@@ -1998,7 +5288,7 @@
         "summary": "Suivi des entreprises de livraison",
         "description": "Tableau de suivi détaillé par entreprise avec toutes les métriques financières",
         "tags": [
-          "Livraison"
+          "Boutiques - Livraison"
         ],
         "security": [
           {
@@ -2136,7 +5426,7 @@
         "summary": "Dépenses enregistrées des entreprises de livraison",
         "description": "Retourne le détail des dépenses par catégorie pour chaque entreprise",
         "tags": [
-          "Livraison"
+          "Boutiques - Livraison"
         ],
         "security": [
           {

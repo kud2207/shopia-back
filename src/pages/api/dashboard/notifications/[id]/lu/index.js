@@ -1,9 +1,9 @@
 /**
  * @swagger
- * /api/dashboard/notifications/{id}:
- *   delete:
- *     summary: Supprimer une notification
- *     description: Supprime une notification spécifique.
+ * /api/dashboard/notifications/{id}/lu:
+ *   patch:
+ *     summary: Marquer une notification comme lue
+ *     description: Marque une notification spécifique comme lue par l'admin connecté.
  *     tags:
  *       - Notifications
  *     security:
@@ -18,7 +18,7 @@
  *
  *     responses:
  *       200:
- *         description: Notification supprimée
+ *         description: Notification marquée comme lue
  */
 
 import dbConnect from 'src/@apiCore/lib/mongodb'
@@ -27,7 +27,7 @@ import { withAuth } from 'src/@apiCore/middlewares/authMiddleware'
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).json({ body: 'OK' })
-  if (req.method !== 'DELETE') return res.status(405).json({ message: 'Méthode non autorisée' })
+  if (req.method !== 'PATCH') return res.status(405).json({ message: 'Méthode non autorisée' })
 
   try {
     const auth = await withAuth({ 
@@ -39,18 +39,25 @@ export default async function handler(req, res) {
 
     const { id } = req.query
 
-    const notification = await Notification.findByIdAndDelete(id)
+    const notification = await Notification.findById(id)
     if (!notification) {
       return res.status(404).json({ success: false, message: 'Notification non trouvée' })
     }
 
+    // Ajouter l'admin aux notifications lues
+    if (!notification.readBy?.some(id => id.toString() === auth.admin._id.toString())) {
+      notification.readBy = notification.readBy || []
+      notification.readBy.push(auth.admin._id)
+      await notification.save()
+    }
+
     return res.status(200).json({
       success: true,
-      message: 'Notification supprimée'
+      message: 'Notification marquée comme lue'
     })
 
   } catch (error) {
-    console.error('❌ Delete Notification API ERROR:', error)
+    console.error('❌ Mark as Read API ERROR:', error)
     return res.status(500).json({ success: false, message: 'Erreur serveur', error: error.message })
   }
 }
