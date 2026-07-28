@@ -60,6 +60,21 @@ const adminSchema = new Schema(
       tickets: { type: Boolean, default: false },
       rapports: { type: Boolean, default: false }
     },
+    telephone: { type: String, default: "" },
+    pays: { type: String, default: "" },
+    ville: { type: String, default: "" },
+    preferences: {
+      langue: { type: String, default: "Français" },
+      formatDate: { type: String, default: "JJ/MM/AA" },
+      formatHeure: { type: String, default: "24 heures" },
+      fuseauHoraire: { type: String, default: "Afrique/Yaoundé" },
+      notificationsEmail: { type: Boolean, default: true },
+      notificationsPush: { type: Boolean, default: true }
+    },
+    twoFactor: {
+      smsEnabled: { type: Boolean, default: false },
+      emailEnabled: { type: Boolean, default: false }
+    },
     resetToken: String
   },
   { timestamps: true }
